@@ -26,13 +26,13 @@ function closeSidePanel() {
 // Page Navigation Functions with Lazy Loading
 function navigateToHome() {
     closeSidePanel();
-    showPage('dashboardPage');
+    showPage('dashboardPage', 'navigation');
     updateActiveNavItem('Dashboard');
 }
 
 function navigateToReports() {
     closeSidePanel();
-    showPage('reportsPage');
+    showPage('reportsPage', 'navigation');
     updateActiveNavItem('Reports');
     if (!window.reportsDataLoaded) {
         loadReportsData();
@@ -42,7 +42,7 @@ function navigateToReports() {
 
 function navigateToBlacklist() {
     closeSidePanel();
-    showPage('blacklistPage');
+    showPage('blacklistPage', 'navigation');
     updateActiveNavItem('Blacklist');
     if (!window.blacklistDataLoaded) {
         loadBlacklistData();
@@ -52,7 +52,7 @@ function navigateToBlacklist() {
 
 function navigateToArchive() {
     closeSidePanel();
-    showPage('archivePage');
+    showPage('archivePage', 'navigation');
     updateActiveNavItem('Archive');
     if (!window.archiveDataLoaded) {
         loadArchiveData();
@@ -62,7 +62,7 @@ function navigateToArchive() {
 
 function navigateToSiteSettings() {
     closeSidePanel();
-    showPage('siteSettingsPage');
+    showPage('siteSettingsPage', 'navigation');
     updateActiveNavItem('Site Settings');
     if (!window.siteSettingsDataLoaded) {
         loadSiteSettingsData();
@@ -74,6 +74,15 @@ function showPage(pageId, caller = 'navigation') {
     // Performance monitoring
     const startTime = performance.now();
     
+    // Prevent conflicts during page restoration
+    if (caller === 'navigation' && !pageRestorationCompleted) {
+        console.log('⏳ Waiting for page restoration to complete before navigation...');
+        setTimeout(() => showPage(pageId, caller), 100);
+        return;
+    }
+    
+    console.log(`📄 Showing page: ${pageId} (called by: ${caller})`);
+    
     // Hide all pages
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => {
@@ -83,22 +92,26 @@ function showPage(pageId, caller = 'navigation') {
     // Show the selected page
     const targetPage = document.getElementById(pageId);
     if (targetPage) {
-        // Update URL fragment IMMEDIATELY (before any delays)
+        // Update URL fragment IMMEDIATELY and ensure it persists
         const fragmentName = pageId.replace('Page', '').toLowerCase();
-        if (window.location.hash !== '#' + fragmentName) {
-            history.replaceState(null, null, '#' + fragmentName);
+        const expectedHash = '#' + fragmentName;
+        
+        // Only update URL if it's different and we're not in restoration mode
+        if (window.location.hash !== expectedHash) {
+            console.log(`🔗 Updating URL fragment from ${window.location.hash} to ${expectedHash}`);
+            history.replaceState(null, null, expectedHash);
         }
         
         // Save current page to localStorage AFTER URL update
         saveCurrentPage(pageId);
         
-        setTimeout(() => {
-            targetPage.classList.add('active');
-            
-            // Log performance
-            const endTime = performance.now();
-            const loadTime = endTime - startTime;
-            console.log(`Page ${pageId} loaded in ${loadTime.toFixed(2)}ms`);
+        // Show page immediately, no setTimeout delay
+        targetPage.classList.add('active');
+        
+        // Log performance
+        const endTime = performance.now();
+        const loadTime = endTime - startTime;
+        console.log(`✅ Page ${pageId} loaded in ${loadTime.toFixed(2)}ms`);
         }, 50); // Small delay for smooth transition
         
         return true;
@@ -142,7 +155,12 @@ function saveCurrentPage(pageId) {
 function restorePageFromFragment() {
     try {
         const fragment = window.location.hash.substring(1); // Remove # symbol
-        if (!fragment) return false;
+        console.log(`🔗 Attempting to restore from URL fragment: "${fragment}"`);
+        
+        if (!fragment) {
+            console.log('🔗 No URL fragment found');
+            return false;
+        }
         
         // Map fragment names to page IDs
         const fragmentToPageMap = {
@@ -156,6 +174,8 @@ function restorePageFromFragment() {
         };
         
         const pageId = fragmentToPageMap[fragment.toLowerCase()];
+        console.log(`🔗 Fragment "${fragment}" maps to pageId: "${pageId}"`);
+        
         if (pageId && document.getElementById(pageId)) {
             // Update navigation
             const pageToNavMap = {
@@ -168,16 +188,20 @@ function restorePageFromFragment() {
             };
             
             const navName = pageToNavMap[pageId] || 'Dashboard';
+            console.log(`🔗 Restoring page "${pageId}" with nav "${navName}"`);
+            
             updateActiveNavItem(navName);
             
-            // Show the page (this will also update localStorage)
-            pageRestorationCompleted = true;
+            // Show the page using 'fragment-restore' caller to prevent conflicts
             showPage(pageId, 'fragment-restore');
             
             // Load specific data for the page
             loadPageSpecificData(pageId);
             
+            console.log(`✅ Successfully restored page from fragment: ${fragment} -> ${pageId}`);
             return true;
+        } else {
+            console.log(`❌ Page element not found for pageId: "${pageId}"`);
         }
     } catch (error) {
         console.warn('⚠️ Could not restore page from fragment:', error);
@@ -188,11 +212,9 @@ function restorePageFromFragment() {
 function restoreCurrentPage() {
     try {
         const savedPage = localStorage.getItem('logodaleel_current_page');
+        console.log(`💾 Attempting to restore from localStorage: "${savedPage}"`);
         
         if (savedPage && document.getElementById(savedPage)) {
-            pageRestorationCompleted = true;
-            showPage(savedPage, 'restore');
-            
             // Update the navigation item based on page
             const pageToNavMap = {
                 'dashboardPage': 'Dashboard',
@@ -204,19 +226,23 @@ function restoreCurrentPage() {
             };
             
             const navName = pageToNavMap[savedPage] || 'Dashboard';
+            console.log(`💾 Restoring page "${savedPage}" with nav "${navName}"`);
+            
             updateActiveNavItem(navName);
+            showPage(savedPage, 'localStorage-restore');
             
             // Load data for the restored page
             loadPageData(savedPage);
             
+            console.log(`✅ Successfully restored page from localStorage: ${savedPage}`);
             return true;
         } else {
-            return false;
+            console.log(`❌ Page element not found for savedPage: "${savedPage}"`);
         }
     } catch (error) {
-        console.warn('Could not restore current page:', error);
-        return false;
+        console.warn('⚠️ Could not restore current page:', error);
     }
+    return false;
 }
 
 // Load appropriate data when restoring a page
@@ -873,16 +899,23 @@ document.addEventListener('DOMContentLoaded', function() {
     setupAutomaticSync();
     
     // Initialize page system FIRST - restore from URL fragment, localStorage, or default to dashboard
-    // Small delay to ensure DOM elements are ready
+    // Longer delay to ensure DOM elements are fully ready
     setTimeout(() => {
+        console.log('🔄 Starting page restoration...');
+        pageRestorationCompleted = false; // Reset flag
+        
         const pageRestored = restorePageFromFragment() || restoreCurrentPage();
         if (!pageRestored) {
-            pageRestorationCompleted = true;
+            console.log('📄 No page to restore, defaulting to dashboard');
             showPage('dashboardPage', 'fallback');
             updateActiveNavItem('Dashboard');
         }
+        
+        // Mark restoration as completed
         pageRestorationCompleted = true;
-    }, 50);
+        console.log('✅ Page restoration completed');
+        
+    }, 150); // Increased delay for better stability
     
     // Load business categories from CSV first
     loadBusinessCategories().then(() => {
@@ -4855,7 +4888,7 @@ window.addEventListener('scroll', function() {
 // Categories Management Functions
 function navigateToCategories() {
     closeSidePanel();
-    showPage('categoriesPage');
+    showPage('categoriesPage', 'navigation');
     updateActiveNavItem('Categories');
     
     // Initialize categories if they don't exist
