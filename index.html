@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Directory - Logo Daleel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="top-bar">
+            <div class="logo-section">
+                <div class="logo-dropdown-container">
+                    <img src="logo.svg" alt="LogoDaleel - Saudi Arabia Business Directory" class="site-logo" onclick="toggleLogoDropdown()" style="cursor: pointer;">
+                    <div id="logoDropdown" class="logo-dropdown">
+                        <div class="logo-dropdown-content">
+                            <button class="dropdown-item" onclick="showTermsAndConditions()">
+                                Terms and Conditions
+                            </button>
+                            <button class="dropdown-item" onclick="showPrivacyPolicy()">
+                                Privacy Policy
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-info">
+                                <div class="trading-name">
+                                    <span id="tradingNameDisplay">LogoDaleel.com</span>
+                                </div>
+                                <div class="saudi-business-center">
+                                    <img id="saudiBusinessLogo" src="" alt="Saudi Business Center" style="display: none; max-width: 80px; height: auto; margin: 8px 0;">
+                                </div>
+                                <div class="registration-number">
+                                    <span id="registrationNumberDisplay">Not set</span>
+                                </div>
+                                <div class="contact-email">
+                                    <a href="#" id="contactEmailDisplay">Not set</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="search-section">
+                <div class="search-container">
+                    <label for="searchInput" class="sr-only">Search for companies</label>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="searchInput" placeholder="Try: 'Find coffee shops', 'Tech companies', 'I need a lawyer'..." class="search-input" autocomplete="off">
+                        <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">
+                            <span>×</span>
+                        </button>
+                        <button id="filterToggleBtn" class="filter-toggle-btn-inline" title="Advanced Filters">
+                            <span>⚙️</span>
+                            <span class="filter-count" style="display: none;"></span>
+                        </button>
+                    </div>
+                    <div id="searchSuggestions" class="search-suggestions" style="display: none;"></div>
+                    <div id="searchHistory" class="search-history" style="display: none;">
+                        <div class="search-history-header">Recent Searches</div>
+                        <div class="search-history-items"></div>
+                        <button class="clear-history-btn">Clear History</button>
+                    </div>
+                </div>
+                
+                <!-- Advanced Filters -->
+                <div id="advancedFilters" class="advanced-filters" style="display: none;">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label for="categoryFilter">Business Category</label>
+                            <select id="categoryFilter">
+                                <option value="">All Categories</option>
+                                <option value="restaurant">Restaurant</option>
+                                <option value="retail">Retail</option>
+                                <option value="service">Service</option>
+                                <option value="healthcare">Healthcare</option>
+                                <option value="education">Education</option>
+                                <option value="technology">Technology</option>
+                                <option value="automotive">Automotive</option>
+                                <option value="real-estate">Real Estate</option>
+                                <option value="finance">Finance</option>
+                                <option value="entertainment">Entertainment</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="locationSearch">City/Town</label>
+                            <div class="multi-select-container">
+                                <div class="multi-select-dropdown" id="locationDropdown">
+                                    <div class="multi-select-search">
+                                        <input type="text" id="locationSearch" placeholder="Search locations..." autocomplete="off">
+                                    </div>
+                                    <div class="selected-locations-display" id="selectedLocationsDisplay"></div>
+                                    <div class="multi-select-options" id="locationOptions">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label for="announcementFilter">Announcement</label>
+                            <select id="announcementFilter">
+                                <option value="">All Companies</option>
+                                <option value="has-announcement">Has Announcement</option>
+                                <option value="no-announcement">No Announcement</option>
+                            </select>
+                        </div>
+                        </div>
+                        <div class="filters-actions">
+                            <button id="applyFiltersBtn" class="apply-filters-btn">Apply Filters</button>
+                            <button id="clearFiltersBtn" class="clear-filters-btn">Clear All</button>
+                            <button id="saveSearchBtn" class="save-search-btn">Save Search</button>
+                        </div>
+                </div>
+            </div>
+            <div class="action-section">
+                <button id="newsToggleBtn" onclick="toggleNewsPanel()" class="news-panel-btn" title="View Latest Updates & Offers">
+                    <span>📢</span>
+                    <span class="news-count" id="newsCount">0</span>
+                </button>
+                <button onclick="handleAddCompany()" class="add-company-btn">
+                    <div class="btn-text-main">Add Company</div>
+                    <div class="btn-text-sub">Edit Company</div>
+                </button>
+                <button id="signOutBtn" onclick="signOutUser()" class="sign-out-btn" style="display: none;">Sign Out</button>
+            </div>
+        </header>
+        
+        <!-- Saved Searches Bar -->
+        <div id="savedSearchesBar" class="saved-searches-bar" style="display: none;">
+            <div class="saved-searches-label">Saved Searches:</div>
+            <div id="savedSearchesList" class="saved-searches-list"></div>
+        </div>
+        
+        <!-- Search Results Header -->
+        <div id="searchResultsHeader" class="search-results-header" style="display: none;">
+            <div class="search-results-info">
+                <span id="searchResultsCount"></span>
+                <span id="searchResultsTime"></span>
+            </div>
+        </div>
+        
+        <main>
+            <div id="companiesGrid" class="companies-grid">
+                <div id="loadingIndicator" class="loading-indicator">
+                    <div class="loading-spinner"></div>
+                    <p>Loading companies...</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- News/Updates Side Panel -->
+        <div id="newsPanel" class="news-panel">
+            <div class="news-panel-header">
+                <h3>
+                    <span>📢</span>
+                    Latest Updates & Offers
+                </h3>
+                <button class="news-panel-close" onclick="toggleNewsPanel()">×</button>
+            </div>
+            <div class="news-panel-content" id="newsPanelContent">
+                <!-- News companies will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- News Panel Overlay -->
+        <div id="newsPanelOverlay" class="news-panel-overlay" onclick="toggleNewsPanel()"></div>
+    </div>
+
+    <!-- Terms and Conditions Popup -->
+    <div id="termsPopup" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Terms and Conditions</h2>
+                <button class="modal-close" onclick="closeTermsPopup()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="termsContent" class="content-text">
+                    Loading terms and conditions...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Popup -->
+    <div id="privacyPopup" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Privacy Policy</h2>
+                <button class="modal-close" onclick="closePrivacyPopup()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="privacyContent" class="content-text">
+                    Loading privacy policy...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Popup -->
+    <div id="companyPopup" class="company-popup">
+        <div class="popup-action-buttons">
+            <div class="action-button-container">
+                <button class="share-btn-popup" onclick="shareCompany(this.dataset.companyId)" title="Share this company">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
+                    </svg>
+                </button>
+                <div class="button-divider"></div>
+                <div class="popup-menu-container">
+                    <button class="popup-menu-btn" onclick="togglePopupMenu('main-popup')" title="More options">
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                        </svg>
+                    </button>
+                    <div class="popup-menu-dropdown" id="popup-menu-main-popup">
+                        <div class="popup-menu-option" onclick="openReportModal('main-popup', 'Unknown Company')">
+                            Report Company
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h3 class="company-name"></h3>
+        <div class="company-tags">
+            <div class="company-category"></div>
+            <div class="company-city"></div>
+        </div>
+        <p class="company-description"></p>
+        <div class="company-news">
+            <div class="news-updated-date"></div>
+            <div class="news-content"></div>
+        </div>
+        <div class="company-links">
+            <a href="#" class="company-phone" target="_blank"></a>
+            <a href="#" class="company-website" target="_blank">Website</a>
+            <a href="#" class="company-maps" target="_blank">Maps</a>
+        </div>
+        <div class="social-icons">
+            <a href="#" class="social-icon linkedin" target="_blank" title="LinkedIn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+            </a>
+            <a href="#" class="social-icon instagram" target="_blank" title="Instagram">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+            </a>
+            <a href="#" class="social-icon tiktok" target="_blank" title="TikTok">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                </svg>
+            </a>
+            <a href="#" class="social-icon snapchat" target="_blank" title="Snapchat">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.219-.359-.219c-.359-.359-.359-.719 0-1.078.359-.359.719-.359 1.078 0 0 0 .719.359.719.359s5.957-1.406 5.957-1.406c1.036-.24 2.49-.146 3.439-.041C20.842 21.405 24.004 17.066 24.004 11.987 24.004 5.367 18.637.001 12.017.001z"/>
+                </svg>
+            </a>
+            <a href="#" class="social-icon whatsapp" target="_blank" title="WhatsApp">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.905 3.488"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- Add Company Modal with Authentication -->
+    <div id="addCompanyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="hideAddCompanyForm()">&times;</span>
+            
+            <!-- Authentication Step -->
+            <div id="authStep" class="auth-step">
+                <div id="phoneAuthStep">
+                    <h2>Sign In or Sign Up</h2>
+                    <p>Enter your Saudi mobile number to add or edit your company information</p>
+                    
+                    <form id="authPhoneForm">
+                        <div class="phone-input-container">
+                            <label for="authPhone" class="sr-only">Saudi Mobile Number</label>
+                            <span class="country-code">+966</span>
+                            <input type="tel" id="authPhone" placeholder="5XXXXXXXX" maxlength="9" autocomplete="tel" required>
+                        </div>
+                        <button type="submit" class="primary-btn">Send Verification Code</button>
+                    </form>
+                </div>
+                
+                <div id="otpAuthStep" style="display: none;">
+                    <h2>Enter Verification Code</h2>
+                    <p>We sent a 6-digit code to <span id="authDisplayPhone"></span></p>
+                    
+                    <form id="authOtpForm">
+                        <label for="authOtpCode" class="sr-only">Verification Code</label>
+                        <input type="text" id="authOtpCode" class="otp-input" placeholder="000000" maxlength="6" autocomplete="one-time-code" required>
+                        
+                        <div class="otp-actions">
+                            <button type="submit" class="primary-btn">Verify & Continue</button>
+                            <button type="button" class="resend-btn" id="authResendBtn" onclick="resendAuthOTP()">Resend Code</button>
+                        </div>
+                        
+                        <div id="authResendCountdown" style="display: none;">
+                            <small>Resend code in <span id="authCountdownTimer">60</span> seconds</small>
+                        </div>
+                    </form>
+                    
+                    <button type="button" class="back-btn" onclick="goBackToAuthPhone()">← Back</button>
+                </div>
+            </div>
+            
+            <!-- Company Form Step -->
+            <div id="companyFormStep" style="display: none;">
+                <div class="title-with-menu">
+                    <div class="popup-action-buttons">
+                        <div class="action-button-container">
+                            <div class="modal-menu-container">
+                                <button class="modal-menu-btn" onclick="toggleModalMenu()" title="More options">
+                                    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                    </svg>
+                                </button>
+                                <div class="modal-menu-dropdown" id="modalMenuDropdown">
+                                    <div class="modal-menu-option" id="toggleVisibilityOption" onclick="toggleCompanyVisibility()">
+                                        <svg id="toggleVisibilityIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+                                        </svg>
+                                        <span id="toggleVisibilityText">Hide Company from Main Page</span>
+                                    </div>
+                                    <div class="modal-menu-option modal-menu-delete" onclick="deleteCompanyAccount()">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                        </svg>
+                                        Delete Account
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="button-divider"></div>
+                            <button class="modal-share-btn" onclick="shareOwnCompany()" title="Share your company profile">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <h2 id="companyFormTitle">Add Your Company</h2>
+                </div>
+                <p id="companyFormSubtitle">Please fill in your company details</p>
+                
+                <form id="addCompanyForm">
+                    <div class="form-group">
+                        <label>Logo Upload:</label>
+                        <div class="logo-upload-container">
+                            <div class="logo-upload-area">
+                                <div class="logo-preview-square" id="logoPreviewSquare">
+                                    <div class="logo-placeholder" id="logoPlaceholder">
+                                        <div class="upload-icon">📷</div>
+                                        <div class="upload-text">Company Logo</div>
+                                    </div>
+                                    <img id="logoPreviewImg" src="" alt="Logo Preview" style="display: none;">
+                                </div>
+                                <button type="button" class="logo-upload-btn" onclick="document.getElementById('companyLogo').click()">
+                                    Upload Logo
+                                </button>
+                                <div class="logo-helper-text">
+                                    <div class="file-requirements">Max file size: 2MB</div>
+                                    <div class="dimension-suggestion">Recommended: 200x200px</div>
+                                </div>
+                            </div>
+                            <input type="file" id="companyLogo" name="logo" accept="image/*" style="display: none;" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="companyName">Company Name:</label>
+                        <input type="text" id="companyName" name="name" autocomplete="organization" maxlength="40" required>
+                        <small class="input-help">Maximum 40 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="companyDescription">Description:</label>
+                        <textarea id="companyDescription" name="description" autocomplete="off" maxlength="120" required></textarea>
+                        <small class="input-help">Maximum 120 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="companyCategory">Business Category:</label>
+                        <div class="category-input-container">
+                            <input type="text" id="companyCategory" name="category" placeholder="Type to search categories..." autocomplete="off" required>
+                            <div id="categoryDropdown" class="category-dropdown">
+                                <!-- Dynamic suggestions will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="companyPhone">Phone:</label>
+                        <div class="phone-input-container">
+                            <span class="country-code">+966</span>
+                            <input type="tel" id="companyPhone" name="phone" placeholder="5XXXXXXXX" maxlength="9" autocomplete="tel" readonly>
+                            <input type="text" id="phoneOtpInput" class="phone-otp-inline" placeholder="Enter 6-digit OTP" maxlength="6" style="display: none;">
+                            <button type="button" id="verifyPhoneOtpBtn" class="verify-otp-btn-inline" style="display: none;">Verify</button>
+                            <button type="button" id="changePhoneBtn" class="change-phone-btn">Change</button>
+                            <button type="button" id="sendOtpBtn" class="send-otp-btn" style="display: none;">Send OTP</button>
+                            <button type="button" id="cancelPhoneChangeBtn" class="cancel-phone-btn" style="display: none;" title="Cancel">✕</button>
+                        </div>
+                        <div id="phoneOtpTimer" class="otp-timer" style="display: none;">
+                            Resend in <span id="phoneOtpCountdown">60</span>s
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="companyWebsite">Website:</label>
+                        <input type="url" id="companyWebsite" name="website" autocomplete="url">
+                    </div>
+                    
+                    <!-- Branch System -->
+                    <div class="branch-section">
+                        <h3 class="branch-title">Branch 1</h3>
+                        <div class="branch-group" data-branch="1">
+                            <div class="form-group">
+                                <label for="companyMaps1">Maps URL:</label>
+                                <input type="url" id="companyMaps1" name="maps1" placeholder="Google Maps URL" autocomplete="url">
+                            </div>
+                            <div class="form-group">
+                                <label for="addressInput1">City/Town:</label>
+                                <div class="address-input-container">
+                                    <input type="text" id="addressInput1" placeholder="Enter district, city, or province in Saudi Arabia" autocomplete="address-level2">
+                                    <div class="address-dropdown" id="addressDropdown1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="add-branch-container">
+                        <button type="button" class="add-branch-btn" id="addBranchBtn">+ Add Branch</button>
+                    </div>
+                    
+                    <div id="additionalBranches"></div>
+                    
+                    <div class="form-group">
+                        <label>Social Media (Optional):</label>
+                        <div class="social-inputs">
+                            <input type="url" id="companyLinkedin" name="linkedin" placeholder="LinkedIn URL">
+                            <input type="url" id="companyInstagram" name="instagram" placeholder="Instagram URL">
+                            <input type="url" id="companyTiktok" name="tiktok" placeholder="TikTok URL">
+                            <input type="url" id="companySnapchat" name="snapchat" placeholder="Snapchat URL">
+                            <input type="url" id="companyWhatsapp" name="whatsapp" placeholder="WhatsApp URL">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="news-header">
+                            <label for="companyNews">News/Updates:</label>
+                            <div class="news-controls">
+                                <button type="button" id="newsToggle" class="news-toggle-btn">
+                                    <span class="toggle-text">OFF</span>
+                                </button>
+                                <div class="news-timer" id="newsTimer">
+                                    <span id="timerDisplay">14d 0h 0m</span>
+                                </div>
+                                <button type="button" id="newsResetBtn" class="news-reset-btn" title="Reset Timer">
+                                    🔄
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="companyNews" name="news" placeholder="Latest news, updates, or announcements about your company..." autocomplete="off" maxlength="300"></textarea>
+                        <small class="input-help">Maximum 300 characters (expandable in display)</small>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Add Company</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="saudi_data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

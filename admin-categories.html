@@ -1,0 +1,2626 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management - LogoDaleel Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <style>
+        .category-manager {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .category-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .category-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-categories {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .btn-success {
+            background-color: #059669;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #047857;
+        }
+        
+        .btn-danger {
+            background-color: #dc2626;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
+        
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        .spreadsheet-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .spreadsheet-table th,
+        .spreadsheet-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+            vertical-align: top;
+            position: relative;
+        }
+        
+        .spreadsheet-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .spreadsheet-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        .editable-cell {
+            cursor: pointer;
+            min-width: 150px;
+            padding: 4px 8px;
+        }
+        
+        .editable-cell:hover {
+            background-color: #eff6ff;
+            outline: 2px solid #3b82f6;
+        }
+        
+        .editable-cell.editing {
+            padding: 0;
+        }
+        
+        .editable-cell input,
+        .editable-cell textarea {
+            width: 100%;
+            border: none;
+            padding: 4px 8px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #fff;
+            outline: 2px solid #3b82f6;
+            border-radius: 3px;
+        }
+        
+        .editable-cell textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        
+        .level-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-right: 8px;
+        }
+        
+        .level-1 {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .level-2 {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .level-3 {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        
+        .category-name-cell {
+            max-width: 200px;
+        }
+        
+        .category-name-en {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .category-name-ar {
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 2px;
+            direction: rtl;
+        }
+        
+        .keywords-cell {
+            max-width: 250px;
+            overflow: hidden;
+        }
+        
+        .keywords-preview {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .parent-cell {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .subcategory-count {
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .company-count {
+            text-align: center;
+            font-weight: 500;
+            color: #059669;
+        }
+        
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .auto-save-indicator {
+            background: #6b7280;
+        }
+        
+        .categories-table {
+            background: white;
+            border-radius: 8px;
+            overflow: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-height: 70vh;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        .category-name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .category-name-ar {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 2px;
+        }
+        
+        .keywords-preview {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .category-actions-cell {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #1f2937;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            color: #374151;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .category-overview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .category-overview strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .form-help {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        
+        .badge-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .category-manager {
+                padding: 10px;
+            }
+            
+            .category-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .category-actions {
+                flex-direction: column;
+            }
+            
+            .search-categories {
+                min-width: auto;
+            }
+            
+            .categories-table {
+                overflow-x: auto;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+            }
+        }
+        
+        /* Save indicator */
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            font-weight: 500;
+        }
+        
+        /* Cell editing styles */
+        .editable-cell.editing {
+            background: #fff3cd !important;
+            border: 2px solid #ffc107;
+        }
+        
+        .editable-cell input,
+        .editable-cell textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: inherit;
+            padding: 2px;
+            resize: vertical;
+        }
+        
+        .keywords-preview {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+        
+        .category-name-en,
+        .category-name-ar {
+            font-weight: 500;
+        }
+        
+        .category-name-ar {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        /* Add Category Row Styles */
+        .add-level1-row {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #2563eb;
+        }
+        
+        .add-level1-row:hover {
+            background: linear-gradient(135deg, #bbdefb 0%, #e1bee7 100%);
+            transform: scale(1.002);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        }
+        
+        .add-category-cell {
+            padding: 16px !important;
+            text-align: center;
+            border: 2px dashed #2563eb !important;
+            border-radius: 8px;
+            margin: 4px;
+        }
+        
+        .add-category-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 500;
+            color: #2563eb;
+            font-size: 14px;
+        }
+        
+        .add-icon {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        .add-text {
+            opacity: 0.9;
+        }
+        
+        /* Subcategory Count Hover Effects */
+        .subcategory-count {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            padding: 4px 8px;
+            min-width: 30px;
+            display: inline-block;
+            margin-top: 4px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .subcategory-count:hover {
+            background: #e3f2fd;
+            color: #1976d2;
+            transform: scale(1.1);
+            border-color: #2196f3;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
+        }
+        
+        .subcategory-count::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-size: 14px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        
+        .subcategory-count:hover::after {
+            content: "+";
+            opacity: 1;
+        }
+        
+        .subcategory-count:hover .count-number {
+            opacity: 0.3;
+        }
+        
+        .count-number {
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Add category inline editing styles */
+        .category-row-adding {
+            background: #fff3cd !important;
+            border-left: 4px solid #ffc107 !important;
+        }
+        
+        .new-category-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .new-category-input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+        }
+        
+        .new-category-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+        
+        .new-category-actions {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .btn-save-new, .btn-cancel-new {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-save-new {
+            background: #059669;
+            color: white;
+        }
+        
+        .btn-save-new:hover {
+            background: #047857;
+        }
+        
+        .btn-cancel-new {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-cancel-new:hover {
+            background: #4b5563;
+        }
+    </style>
+</head>
+<body>
+    <div class="category-manager">
+        <div class="category-header">
+            <div>
+                <h1>Category Management</h1>
+                <p>Complete Saudi Business Categories with all Level 1 and Level 2 classifications</p>
+                <div class="category-overview">
+                    <strong>📊 Category Overview:</strong> 40 Level 1 Categories • 300+ Level 2 Subcategories • Bilingual (English/Arabic) • Based on Saudi Business Classification Standards
+                </div>
+            </div>
+            <div class="category-actions">
+                <input type="text" class="search-categories" placeholder="Search categories..." id="categorySearch">
+                <button class="btn btn-success" onclick="openAddCategoryModal()">
+                    ➕ Add Category
+                </button>
+                <button class="btn btn-secondary" onclick="exportCategories()" title="Download categories as CSV file for desktop editing">
+                    ⬇️ Export
+                </button>
+                <button class="btn btn-primary" onclick="importCategories()" title="Upload CSV or JSON file to update categories">
+                    ⬆️ Import
+                </button>
+                <button class="btn btn-primary" onclick="initializeAllCategories()">
+                    🔄 Load All Categories
+                </button>
+            </div>
+        </div>
+        
+        <div class="category-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCategories">40</div>
+                <div class="stat-label">Level 1 Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalSubcategories">300+</div>
+                <div class="stat-label">Level 2 Subcategories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgKeywords">0</div>
+                <div class="stat-label">Avg Keywords per Category</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="companiesWithCategory">0</div>
+                <div class="stat-label">Companies Categorized</div>
+            </div>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <div class="categories-table">
+            <table class="table spreadsheet-table">
+                <thead>
+                    <tr>
+                        <th>Level 1</th>
+                        <th>Level 1 (Arabic)</th>
+                        <th>Level 2</th>
+                        <th>Level 2 (Arabic)</th>
+                        <th>Level 3</th>
+                        <th>Level 3 (Arabic)</th>
+                        <th>Level 1 Keywords & Synonyms</th>
+                        <th>Level 2 Keywords & Synonyms</th>
+                        <th>Level 3 Keywords & Synonyms</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="categoriesTableBody">
+                    <!-- Add Level 1 Category Row -->
+                    <tr class="add-level1-row" onclick="addLevel1Category()" title="Click to add a new Level 1 category">
+                        <td colspan="10" class="add-category-cell">
+                            <div class="add-category-content">
+                                <span class="add-icon">➕</span>
+                                <span class="add-text">Click here to add a new Level 1 category</span>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="11">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                Loading categories...
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Category Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Category</h2>
+                <button class="close-btn" onclick="closeCategoryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label class="form-label" for="categoryName">Category Name (English) *</label>
+                        <input type="text" class="form-input" id="categoryName" required maxlength="100" 
+                               placeholder="e.g., Food & Beverages">
+                        <div class="form-help">Enter the category name in English (max 100 characters)</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="categoryNameAr">Category Name (Arabic) *</label>
+                        <input type="text" class="form-input" id="categoryNameAr" required dir="rtl" maxlength="100"
+                               placeholder="مثال: الطعام والمشروبات">
+                        <div class="form-help">Enter the category name in Arabic (max 100 characters)</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="categoryKeywords">Keywords *</label>
+                        <textarea class="form-input form-textarea keywords-input" id="categoryKeywords" required maxlength="1000"
+                                  placeholder="restaurant; مطعم; food; طعام; dining; تناول الطعام; cafe; مقهى"></textarea>
+                        <div class="form-help">
+                            Enter keywords separated by semicolons (;). Include both English and Arabic keywords. Max 1000 characters.<br>
+                            💡 <strong>Tip:</strong> Use specific terms that customers might search for<br>
+                            <span class="keyword-count">0 / 1000 characters</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveCategory()">Save Category</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+                <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the category "<span id="deleteCategory"></span>"?</p>
+                <p style="color: #dc2626; font-size: 0.9rem;">This action cannot be undone. Companies using this category will need to be recategorized.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <!-- Help Section -->
+    <div class="category-manager" style="margin-top: 40px;">
+        <div class="category-header">
+            <div>
+                <h2>📚 Categories Management Help</h2>
+                <p>Tips and best practices for managing business categories</p>
+            </div>
+            <button class="btn btn-secondary" onclick="toggleHelpSection()">
+                <span id="helpToggleText">Show Help</span> <i class="fas fa-chevron-down" id="helpToggleIcon"></i>
+            </button>
+        </div>
+        
+        <div class="help-content" id="helpContent" style="display: none;">
+            <div class="help-cards">
+                <div class="help-card">
+                    <div class="help-card-header">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3>Saudi Business Categories</h3>
+                    </div>
+                    <ul>
+                        <li><strong>40 Level 1 Categories:</strong> Major business sectors</li>
+                        <li><strong>300+ Level 2 Categories:</strong> Detailed subcategories</li>
+                        <li>Based on official Saudi business classification standards</li>
+                        <li>Comprehensive coverage of all business types in KSA</li>
+                        <li>Bilingual support (English & Arabic)</li>
+                        <li>Includes traditional Saudi businesses and modern sectors</li>
+                        <li>Regular updates to reflect Vision 2030 initiatives</li>
+                        <li>🔄 Use "Load All Categories" to initialize comprehensive list</li>
+                    </ul>
+                </div>
+                
+                <div class="help-card">
+                    <div class="help-card-header">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3>Category Guidelines</h3>
+                    </div>
+                    <ul>
+                        <li>Use clear, descriptive category names</li>
+                        <li>Provide both English and Arabic names</li>
+                        <li>Include comprehensive keywords for better matching</li>
+                        <li>Consider how customers would search for businesses</li>
+                        <li>Avoid overly specific or narrow categories</li>
+                    </ul>
+                </div>
+                
+                <div class="help-card">
+                    <div class="help-card-header">
+                        <i class="fas fa-tags"></i>
+                        <h3>Keyword Best Practices</h3>
+                    </div>
+                    <ul>
+                        <li>Include variations and synonyms</li>
+                        <li>Add both English and Arabic terms</li>
+                        <li>Include common misspellings</li>
+                        <li>Use semicolons (;) to separate keywords</li>
+                        <li>Include related service terms</li>
+                    </ul>
+                </div>
+                
+                    <div class="help-card">
+                        <div class="help-card-header">
+                            <i class="fas fa-keyboard"></i>
+                            <h3>Adding Categories</h3>
+                        </div>
+                        <ul>
+                            <li><strong>Add Level 1:</strong> Click the blue dashed row at the top</li>
+                            <li><strong>Add Level 2:</strong> Hover over Level 1 subcategory count and click "+"</li>
+                            <li><strong>Add Level 3:</strong> Hover over Level 2 subcategory count and click "+"</li>
+                            <li><strong>Inline Editing:</strong> New categories appear immediately in edit mode</li>
+                            <li><strong>Quick Save:</strong> Press Enter to save, Escape to cancel</li>
+                            <li><strong>Auto-save:</strong> Changes are saved automatically</li>
+                            <li><kbd>Ctrl+Shift+N</kbd> - Quick add Level 1 category</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-card">
+                        <div class="help-card-header">
+                            <i class="fas fa-keyboard"></i>
+                            <h3>Keyboard Shortcuts</h3>
+                        </div>
+                        <ul>
+                            <li><kbd>Ctrl+N</kbd> - Add new category (modal)</li>
+                            <li><kbd>Ctrl+Shift+N</kbd> - Add Level 1 category (inline)</li>
+                            <li><kbd>Ctrl+S</kbd> - Save category (when editing)</li>
+                            <li><kbd>Escape</kbd> - Close modals or cancel editing</li>
+                            <li><strong>Auto-save:</strong> Drafts are saved automatically</li>
+                            <li><strong>Search:</strong> Search works in real-time</li>
+                        </ul>
+                    </div>                <div class="help-card">
+                    <div class="help-card-header">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Usage Statistics</h3>
+                    </div>
+                    <ul>
+                        <li>Monitor which categories are most used</li>
+                        <li>Review categories with zero companies</li>
+                        <li>Check keyword effectiveness</li>
+                        <li>Review user suggestions regularly</li>
+                        <li>Export data as CSV for desktop editing</li>
+                        <li>Import edited CSV files to update categories</li>
+                        <li>Changes sync automatically with main dashboard</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .help-content {
+            margin-top: 20px;
+        }
+        
+        .help-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .help-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #2563eb;
+        }
+        
+        .help-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .help-card-header i {
+            color: #2563eb;
+            font-size: 1.2rem;
+        }
+        
+        .help-card-header h3 {
+            margin: 0;
+            color: #1f2937;
+        }
+        
+        .help-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .help-card li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        kbd {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.875rem;
+            font-family: monospace;
+        }
+    </style>
+    
+    <script>
+        function toggleHelpSection() {
+            const helpContent = document.getElementById('helpContent');
+            const toggleText = document.getElementById('helpToggleText');
+            const toggleIcon = document.getElementById('helpToggleIcon');
+            
+            if (helpContent.style.display === 'none') {
+                helpContent.style.display = 'block';
+                toggleText.textContent = 'Hide Help';
+                toggleIcon.className = 'fas fa-chevron-up';
+            } else {
+                helpContent.style.display = 'none';
+                toggleText.textContent = 'Show Help';
+                toggleIcon.className = 'fas fa-chevron-down';
+            }
+        }
+    </script>
+    
+    <!-- Include admin-script.js for CSV data -->
+    <script src="admin-script.js"></script>
+    
+    <script>
+        // Global variables
+        let currentCategories = [];
+        let editingCategoryIndex = -1;
+        let categoryToDelete = null;
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCategories();
+            loadStatistics();
+            setupEventListeners();
+        });
+        
+        // Listen for storage events from the main Categories page
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'logodaleel_refresh_trigger') {
+                console.log('Advanced Categories Manager: Refresh trigger received from Categories page');
+                setTimeout(() => {
+                    loadCategories();
+                    showSaveIndicator('Categories refreshed from main dashboard');
+                }, 500);
+            }
+        });
+        
+        
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('categorySearch').addEventListener('input', filterCategories);
+            
+            // Form submission
+            document.getElementById('categoryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveCategory();
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+N or Cmd+N to add new category
+                if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                    e.preventDefault();
+                    openAddCategoryModal();
+                }
+                
+                // Ctrl+Shift+N to add Level 1 category directly in tree
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'N') {
+                    e.preventDefault();
+                    addLevel1Category();
+                }
+                
+                // Escape to close modals
+                if (e.key === 'Escape') {
+                    closeCategoryModal();
+                    closeDeleteModal();
+                }
+                
+                // Ctrl+S or Cmd+S to save (when modal is open)
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    const modal = document.getElementById('categoryModal');
+                    if (modal.style.display === 'block') {
+                        e.preventDefault();
+                        saveCategory();
+                    }
+                }
+            });
+            
+            // Auto-save draft while typing (with debounce)
+            let saveTimer;
+            const formInputs = document.querySelectorAll('#categoryForm input, #categoryForm textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    // Update character counter for keywords
+                    if (input.id === 'categoryKeywords') {
+                        updateKeywordCounter(input.value);
+                    }
+                    
+                    clearTimeout(saveTimer);
+                    saveTimer = setTimeout(() => {
+                        saveDraft();
+                    }, 2000); // Save draft after 2 seconds of inactivity
+                });
+            });
+            
+            // Real-time validation
+            document.getElementById('categoryName').addEventListener('blur', validateCategoryName);
+            document.getElementById('categoryNameAr').addEventListener('blur', validateCategoryNameAr);
+        }
+        
+        function updateKeywordCounter(value) {
+            const counter = document.querySelector('.keyword-count');
+            if (counter) {
+                const length = value.length;
+                counter.textContent = `${length} / 1000 characters`;
+                
+                if (length > 950) {
+                    counter.style.color = '#dc2626'; // Red warning
+                } else if (length > 800) {
+                    counter.style.color = '#f59e0b'; // Orange warning
+                } else {
+                    counter.style.color = '#6b7280'; // Normal gray
+                }
+            }
+        }
+        
+        function validateCategoryName(e) {
+            const value = e.target.value.trim();
+            if (value && currentCategories.some(cat => cat.name.toLowerCase() === value.toLowerCase())) {
+                showAlert('A category with this English name already exists', 'warning');
+            }
+        }
+        
+        function validateCategoryNameAr(e) {
+            const value = e.target.value.trim();
+            if (value && currentCategories.some(cat => cat.nameAr === value)) {
+                showAlert('A category with this Arabic name already exists', 'warning');
+            }
+        }
+        
+        function saveDraft() {
+            const name = document.getElementById('categoryName').value.trim();
+            const nameAr = document.getElementById('categoryNameAr').value.trim();
+            const keywords = document.getElementById('categoryKeywords').value.trim();
+            
+            if (name || nameAr || keywords) {
+                const draft = { name, nameAr, keywords, timestamp: Date.now() };
+                localStorage.setItem('logodaleel_category_draft', JSON.stringify(draft));
+                console.log('📝 Category draft saved');
+            }
+        }
+        
+        function loadDraft() {
+            const draft = localStorage.getItem('logodaleel_category_draft');
+            if (draft) {
+                try {
+                    const draftData = JSON.parse(draft);
+                    
+                    // Check if draft is less than 1 day old
+                    if (Date.now() - draftData.timestamp < 24 * 60 * 60 * 1000) {
+                        if (confirm('Found unsaved category draft. Would you like to restore it?')) {
+                            document.getElementById('categoryName').value = draftData.name || '';
+                            document.getElementById('categoryNameAr').value = draftData.nameAr || '';
+                            document.getElementById('categoryKeywords').value = draftData.keywords || '';
+                        }
+                    } else {
+                        // Remove old draft
+                        localStorage.removeItem('logodaleel_category_draft');
+                    }
+                } catch (e) {
+                    console.warn('Error loading draft:', e);
+                    localStorage.removeItem('logodaleel_category_draft');
+                }
+            }
+        }
+        
+        function clearDraft() {
+            localStorage.removeItem('logodaleel_category_draft');
+        }
+        
+        function loadCategories() {
+            // Load categories from the main script or localStorage
+            try {
+                console.log('🔍 Loading categories...');
+                
+                // First try to get categories from the CSV function
+                let categories = getBusinessCategories();
+                
+                if (!categories || categories.length === 0) {
+                    console.warn('No categories loaded, using sample data for testing');
+                    categories = createSampleCategoriesForTesting();
+                }
+                
+                console.log('✅ Loaded', categories.length, 'categories');
+                currentCategories = categories;
+                renderCategoriesTable(categories);
+                
+                // Update stats
+                updateCategoryStats(categories);
+                
+            } catch (error) {
+                console.error('❌ Error loading categories:', error);
+                showAlert('Error loading categories: ' + error.message, 'error');
+                
+                // Use sample data as fallback
+                const sampleCategories = createSampleCategoriesForTesting();
+                currentCategories = sampleCategories;
+                renderCategoriesTable(sampleCategories);
+                updateCategoryStats(sampleCategories);
+            }
+        }
+        
+        function updateCategoryStats(categories) {
+            // Count Level 1 categories (unique level1 values)
+            const level1Categories = [...new Set(categories.filter(cat => cat.level1).map(cat => cat.level1))];
+            document.getElementById('totalCategories').textContent = level1Categories.length;
+            
+            // Count Level 2 categories (unique level2 values)
+            const level2Categories = [...new Set(categories.filter(cat => cat.level2).map(cat => cat.level2))];
+            document.getElementById('totalSubcategories').textContent = level2Categories.length;
+        }
+        
+        function getBusinessCategories() {
+            // Get CSV categories data from admin script
+            console.log('Advanced Categories Manager: Getting business categories...');
+            try {
+                // Try to get the embedded CSV data from admin-script.js
+                console.log('Advanced Categories Manager: Checking for getEmbeddedCategoriesCSV function...');
+                if (typeof getEmbeddedCategoriesCSV === 'function') {
+                    console.log('Advanced Categories Manager: Found getEmbeddedCategoriesCSV function');
+                    const csvData = getEmbeddedCategoriesCSV();
+                    console.log('Advanced Categories Manager: CSV data length:', csvData.length);
+                    const categories = parseCsvToCategories(csvData);
+                    console.log('Advanced Categories Manager: Parsed categories:', categories.length);
+                    return categories;
+                } else {
+                    console.log('Advanced Categories Manager: getEmbeddedCategoriesCSV function not found, creating sample data for testing');
+                    return createSampleCategoriesForTesting();
+                }
+            } catch (error) {
+                console.error('Advanced Categories Manager: Error loading categories:', error);
+                return createSampleCategoriesForTesting();
+            }
+        }
+        
+        function createSampleCategoriesForTesting() {
+            console.log('Creating sample categories for testing...');
+            return [
+                {
+                    level1: 'Food & Drink',
+                    level1Ar: 'الطعام والشراب',
+                    level2: '',
+                    level2Ar: '',
+                    level3: '',
+                    level3Ar: '',
+                    level1Keywords: 'Food & Drink; الطعام والشراب; Restaurants; مطاعم; eatery; dining place; food joint; Cafes; مقاهي; coffee shop; coffeehouse; café',
+                    level2Keywords: '',
+                    level3Keywords: ''
+                },
+                {
+                    level1: 'Food & Drink',
+                    level1Ar: 'الطعام والشراب',
+                    level2: 'Restaurants',
+                    level2Ar: 'مطاعم',
+                    level3: '',
+                    level3Ar: '',
+                    level1Keywords: 'Food & Drink; الطعام والشراب',
+                    level2Keywords: 'Restaurants; مطاعم; eatery; dining place; food joint',
+                    level3Keywords: ''
+                },
+                {
+                    level1: 'Food & Drink',
+                    level1Ar: 'الطعام والشراب',
+                    level2: 'Restaurants',
+                    level2Ar: 'مطاعم',
+                    level3: 'Saudi Cuisine',
+                    level3Ar: 'المطبخ السعودي',
+                    level1Keywords: 'Food & Drink; الطعام والشراب',
+                    level2Keywords: 'Restaurants; مطاعم; eatery; dining place; food joint',
+                    level3Keywords: 'Saudi Cuisine; المطبخ السعودي'
+                },
+                {
+                    level1: 'Food & Drink',
+                    level1Ar: 'الطعام والشراب',
+                    level2: 'Restaurants',
+                    level2Ar: 'مطاعم',
+                    level3: 'Fast Food',
+                    level3Ar: 'وجبات سريعة',
+                    level1Keywords: 'Food & Drink; الطعام والشراب',
+                    level2Keywords: 'Restaurants; مطاعم; eatery; dining place; food joint',
+                    level3Keywords: 'Fast Food; وجبات سريعة'
+                },
+                {
+                    level1: 'Food & Drink',
+                    level1Ar: 'الطعام والشراب',
+                    level2: 'Cafes & Tea',
+                    level2Ar: 'مقاهي وشاي',
+                    level3: '',
+                    level3Ar: '',
+                    level1Keywords: 'Food & Drink; الطعام والشراب',
+                    level2Keywords: 'Cafes & Tea; مقاهي وشاي; coffee shop; coffeehouse; café',
+                    level3Keywords: ''
+                },
+                {
+                    level1: 'Retail',
+                    level1Ar: 'تجارة التجزئة',
+                    level2: '',
+                    level2Ar: '',
+                    level3: '',
+                    level3Ar: '',
+                    level1Keywords: 'Retail; تجارة التجزئة; Grocery; بقالة; grocery store; market; Electronics; إلكترونيات; Fashion; أزياء; clothing; apparel',
+                    level2Keywords: '',
+                    level3Keywords: ''
+                },
+                {
+                    level1: 'Retail',
+                    level1Ar: 'تجارة التجزئة',
+                    level2: 'Electronics',
+                    level2Ar: 'إلكترونيات',
+                    level3: '',
+                    level3Ar: '',
+                    level1Keywords: 'Retail; تجارة التجزئة',
+                    level2Keywords: 'Electronics; إلكترونيات; computers; phones; gadgets',
+                    level3Keywords: ''
+                }
+            ];
+        }
+
+        function parseCsvToCategories(csvData) {
+            const categories = [];
+            const lines = csvData.split('\n');
+            
+            // Skip header row
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const columns = line.split(',').map(col => col.replace(/"/g, '').trim());
+                if (columns.length >= 9) {
+                    categories.push({
+                        level1: columns[0],
+                        level1Ar: columns[1],
+                        level2: columns[2],
+                        level2Ar: columns[3],
+                        level3: columns[4],
+                        level3Ar: columns[5],
+                        level1Keywords: columns[6],
+                        level2Keywords: columns[7],
+                        level3Keywords: columns[8]
+                    });
+                }
+            }
+            
+            return categories;
+        }
+
+        function flattenCategoryTree(categoryTree) {
+            const categories = [];
+            
+            Object.values(categoryTree).forEach(level1 => {
+                // Add Level 1
+                categories.push({
+                    name: level1.english,
+                    nameAr: level1.arabic,
+                    keywords: level1.level1Keywords || [],
+                    level: 1,
+                    parent: '',
+                    subcategoryCount: Object.keys(level1.level2 || {}).length
+                });
+                
+                // Add Level 2
+                if (level1.level2) {
+                    Object.values(level1.level2).forEach(level2 => {
+                        categories.push({
+                            name: level2.english,
+                            nameAr: level2.arabic,
+                            keywords: level2.level2Keywords || [],
+                            level: 2,
+                            parent: level1.english,
+                            subcategoryCount: Object.keys(level2.level3 || {}).length
+                        });
+                        
+                        // Add Level 3
+                        if (level2.level3) {
+                            Object.values(level2.level3).forEach(level3 => {
+                                categories.push({
+                                    name: level3.english,
+                                    nameAr: level3.arabic,
+                                    keywords: level3.level3Keywords || level3.keywords || [],
+                                    level: 3,
+                                    parent: level2.english,
+                                    subcategoryCount: 0
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+            
+            return categories;
+        }
+        
+        function initializeDefaultCategories() {
+            // Initialize comprehensive Saudi business categories from the CSV data
+            const defaultCategories = [
+                {
+                    name: "Food & Drink",
+                    nameAr: "الطعام والشراب",
+                    keywords: ["Food & Drink", "الطعام والشراب", "Restaurants", "مطاعم", "Saudi Cuisine", "المطبخ السعودي", "Mandi", "مندي", "Kabsa", "كبسة", "eatery", "dining place", "food joint", "Cafes", "مقاهي", "coffee shop", "Specialty Coffee", "قهوة مختصة", "Arabic Coffee", "قهوة عربية", "Bakeries", "مخابز", "Arabic Sweets", "حلويات عربية", "Baklava", "بقلاوة", "Fast Food", "وجبات سريعة", "Shawarma", "شاورما", "Broast", "بروستد", "International Cuisine", "مأكولات عالمية", "Italian", "إيطالية", "American", "أمريكية", "Indian", "هندية", "Chinese", "صينية", "Japanese", "يابانية", "Turkish", "تركية", "Lebanese", "لبنانية", "Syrian", "سورية", "Palestinian", "فلسطينية", "Egyptian", "مصرية", "Filipino", "فلبينية", "Middle Eastern", "شرق أوسطية", "Healthy Food", "طعام صحي", "Vegan", "نباتي", "Juices & Smoothies", "عصائر وسموذي", "Karak", "كرك", "Tea Houses", "بيوت الشاي", "Dessert Cafes", "مقاهي الحلويات", "Waffles", "وافل", "Pancakes", "فطائر", "Crepes", "كريب", "Ice Cream", "آيس كريم", "Kunafa", "كنافة", "Bread", "خبز", "Pastries", "معجنات", "Maamoul", "معمول", "Basbousa", "بسبوسة", "Chocolatiers", "شوكولاتة"]
+                },
+                {
+                    name: "Retail",
+                    nameAr: "تجارة التجزئة",
+                    keywords: ["Retail", "تجارة التجزئة", "Grocery & Markets", "بقالة وأسواق", "Hypermarkets", "هايبرماركت", "Supermarkets", "سوبرماركت", "Mini Markets", "بقالات", "Organic Stores", "متاجر عضوية", "Dates Shops", "محلات تمور", "Electronics", "إلكترونيات", "Mobile Phones", "هواتف", "Computers", "كمبيوترات", "Gaming", "ألعاب", "Home Appliances", "أجهزة منزلية", "Fashion", "أزياء", "Men's Fashion", "أزياء رجالية", "Women's Fashion", "أزياء نسائية", "Kids Fashion", "أزياء الأطفال", "Abayas", "عبايات", "Traditional Wear", "لباس تقليدي", "Shoes", "أحذية", "Bags", "حقائب", "Accessories", "اكسسوارات", "Jewelry & Watches", "مجوهرات وساعات", "Gold", "ذهب", "Diamonds", "ألماس", "Silver", "فضة", "Luxury Watches", "ساعات فاخرة", "Home & Furniture", "منزل وأثاث", "Furniture", "أثاث", "Carpets", "سجاد", "Curtains", "ستائر", "Lighting", "إضاءة", "Kitchenware", "أدوات مطبخ", "Home Decor", "ديكور المنزل", "Bedding", "مفروشات", "Stationery & Books", "قرطاسية وكتب", "Bookshops", "مكتبات", "School Supplies", "أدوات مدرسية", "Office Supplies", "لوازم مكتبية", "Comics & Magazines", "قصص مصورة ومجلات", "Convenience Stores", "متاجر ملائمة", "24/7 Stores", "محلات 24 ساعة", "Gas Station Stores", "متاجر محطات الوقود"]
+                },
+                {
+                    name: "Automotive",
+                    nameAr: "السيارات",
+                    keywords: ["Automotive", "السيارات", "Dealerships", "معارض السيارات", "New Cars", "سيارات جديدة", "Used Cars", "سيارات مستعملة", "Certified Used", "سيارات معتمدة", "Service & Repair", "خدمة وإصلاح", "Workshops", "ورشات", "Diagnostics", "تشخيص", "Body Shop", "سمكرة", "Electrical", "كهرباء", "Paint", "دهان", "Glass Repair", "إصلاح زجاج", "Tires & Batteries", "إطارات وبطاريات", "Tire Shops", "محلات إطارات", "Battery Stores", "محلات البطاريات", "Wheel Alignment", "وزن الأذرعة", "Car Wash & Detailing", "غسيل وتلميع", "Automatic Car Wash", "غسيل سيارات آلي", "Manual Car Wash", "غسيل يدوي", "Detailing", "تلميع", "Ceramic Coating", "طبقة السيراميك", "Car Rentals & Leasing", "تأجير سيارات", "Short-Term Rental", "تأجير قصير المدى", "Long-Term Leasing", "تأجير طويل الأجل", "Luxury Cars", "سيارات فاخرة", "Chauffeur Services", "خدمة سائق", "Spare Parts", "قطع غيار", "Original Spare Parts", "قطع غيار أصلية", "Aftermarket Parts", "قطع غيار بديلة", "Auto Accessories", "اكسسوارات السيارات"]
+                },
+                {
+                    name: "Health & Medical",
+                    nameAr: "الصحة والطب",
+                    keywords: ["Health & Medical", "الصحة والطب", "Hospitals", "مستشفيات", "General Hospitals", "مستشفيات عامة", "Specialized Hospitals", "مستشفيات متخصصة", "Government Hospitals", "مستشفيات حكومية", "Private Hospitals", "مستشفيات خاصة", "Clinics", "عيادات", "General Clinics", "عيادات عامة", "Dental Clinics", "عيادات أسنان", "Dermatology Clinics", "عيادات جلدية", "Pediatrics Clinics", "عيادات أطفال", "Gynecology Clinics", "عيادات نسائية", "Orthopedic Clinics", "عيادات عظام", "ENT Clinics", "عيادات أنف وأذن وحنجرة", "Ophthalmology Clinics", "عيادات عيون", "Cardiology Clinics", "عيادات قلبية", "Oncology Clinics", "عيادات السرطان", "Psychiatry Clinics", "عيادات الطب النفسي", "Physiotherapy Clinics", "عيادات العلاج الطبيعي", "Nutrition & Diet", "تغذية وحمية", "Rehabilitation Centers", "مراكز التأهيل", "Pharmacies", "صيدليات", "Retail Pharmacies", "صيدليات تجزئة", "Online Pharmacies", "صيدليات إلكترونية", "Compounding Pharmacies", "صيدليات تركيب", "Labs & Imaging", "مختبرات وأشعة", "Medical Laboratories", "مختبرات طبية", "Radiology Centers", "مراكز أشعة", "MRI Centers", "مراكز الرنين المغناطيسي", "Blood Banks", "بنوك الدم", "Alternative Medicine", "الطب البديل", "Herbal Medicine", "طب الأعشاب", "Hijama", "حجامة", "Acupuncture", "الوخز بالإبر", "Sports Injury Clinics", "عيادات إصابات رياضية", "Occupational Therapy", "العلاج الوظيفي"]
+                },
+                {
+                    name: "Beauty & Personal Care",
+                    nameAr: "الجمال والعناية الشخصية",
+                    keywords: ["Beauty & Personal Care", "الجمال والعناية الشخصية", "Salons & Barbers", "صالونات وحلاقين", "Beauty Salons", "صالونات تجميل", "Hair Salons", "صالونات شعر", "Barber Shops", "محلات حلاقة", "Nail Salons", "صالونات أظافر", "Makeup Services", "خدمات مكياج", "Spas & Massage", "سبا ومساج", "Day Spas", "منتجعات يومية", "Massage Centers", "مراكز مساج", "Hammam", "حمام مغربي", "Cosmetics & Perfumes", "عطور ومستحضرات التجميل", "Perfume Shops", "محلات عطور", "Makeup Stores", "محلات مكياج", "Skin Care Stores", "محلات العناية بالبشرة", "Fragrance Brands", "ماركات العطور"]
+                },
+                {
+                    name: "Home Services",
+                    nameAr: "خدمات منزلية",
+                    keywords: ["Home Services", "خدمات منزلية", "Cleaning Services", "خدمات التنظيف", "Residential Cleaning", "تنظيف منازل", "Commercial Cleaning", "تنظيف تجاري", "Deep Cleaning", "تنظيف عميق", "Carpet Cleaning", "تنظيف سجاد", "Window Cleaning", "تنظيف النوافذ", "AC & Electrical", "تكييف وكهرباء", "AC Installation", "تركيب تكييف", "AC Maintenance", "صيانة تكييف", "Electrical Maintenance", "صيانة كهربائية", "Appliance Repair", "إصلاح الأجهزة", "Generator Services", "خدمات مولدات الكهرباء", "Plumbing", "سباكة", "Leak Repairs", "إصلاح تسربات", "Pipe Installation", "تركيب أنابيب", "Water Heater Repair", "إصلاح سخان المياه", "Bathroom Remodeling", "تجديد الحمام", "Sewer Line Services", "خدمات خط الصرف الصحي", "Pest Control", "مكافحة الحشرات", "General Pest Control", "مكافحة حشرات عامة", "Termite Treatment", "علاج النمل الأبيض", "Rodent Control", "مكافحة القوارض", "Fumigation", "التبخير", "Bed Bug Treatment", "علاج بق الفراش", "Handyman & Maintenance", "خدمات الصيانة والأعمال اليدوية", "Carpentry", "نجارة", "Painting", "دهان", "Locksmith Services", "خدمات الأقفال", "Tile & Grout", "تركيب البلاط والجص", "Fixture Installation", "تركيب التجهيزات", "Gardening & Landscaping", "تنسيق الحدائق والبستنة", "Lawn Care", "العناية بالعشب", "Garden Design", "تصميم الحدائق", "Irrigation Systems", "أنظمة الري", "Tree Trimming", "تشذيب الأشجار", "Outdoor Lighting", "إضاءة خارجية"]
+                },
+                {
+                    name: "Professional Services",
+                    nameAr: "الخدمات المهنية",
+                    keywords: ["Professional Services", "الخدمات المهنية", "Business Consulting", "استشارات أعمال", "Management Consulting", "استشارات إدارية", "Strategy Consulting", "استشارات استراتيجية", "Marketing Consulting", "استشارات التسويق", "IT Consulting", "استشارات تقنية المعلومات", "HR Consulting", "استشارات الموارد البشرية", "Accounting & Audit", "محاسبة ومراجعة", "Accountants", "محاسبون", "Auditing Firms", "شركات التدقيق", "Tax Advisory", "استشارات ضريبية", "Bookkeeping", "مسك الدفاتر", "Payroll Services", "خدمات الرواتب", "HR & Recruitment", "الموارد البشرية والتوظيف", "Recruitment Agencies", "وكالات توظيف", "Executive Search", "بحث تنفيذي", "Temp Staffing", "توظيف مؤقت", "Payroll Outsourcing", "استعانة خارجية بالرواتب", "Training & Development", "التدريب والتطوير", "Translation & Interpretation", "ترجمة وتفسير", "Translation Services", "خدمات الترجمة", "Interpretation Services", "خدمات الترجمة الفورية", "Localization", "تعريب", "Subtitling", "الترجمة المصاحبة", "Transcription", "النسخ", "Architecture & Engineering", "هندسة ومعمار", "Architectural Design", "تصميم معماري", "Structural Engineering", "هندسة إنشائية", "Civil Engineering", "هندسة مدنية", "MEP Engineering", "هندسة ميكانيكية وكهربائية", "Interior Design", "تصميم داخلي", "Landscape Architecture", "هندسة المناظر الطبيعية"]
+                },
+                {
+                    name: "Legal",
+                    nameAr: "قانون",
+                    keywords: ["Legal", "قانون", "Law Firms", "مكاتب محاماة", "Corporate Law", "قانون الشركات", "Litigation", "التقاضي", "Family Law", "قانون الأسرة", "Intellectual Property", "الملكية الفكرية", "Labor Law", "قانون العمل", "Real Estate Law", "قانون العقارات", "Notary & Attestation", "توثيق وتصديق", "Notary Public Services", "خدمات التوثيق", "Document Attestation", "تصديق الوثائق", "Power of Attorney Services", "خدمات الوكالة", "Contract Drafting", "صياغة العقود", "Legal Translation", "ترجمة قانونية"]
+                },
+                {
+                    name: "Finance & Insurance",
+                    nameAr: "المالية والتأمين",
+                    keywords: ["Finance & Insurance", "المالية والتأمين", "Banks", "بنوك", "Commercial Banks", "بنوك تجارية", "Islamic Banks", "بنوك إسلامية", "Investment Banks", "بنوك استثمار", "Development Banks", "بنوك التنمية", "Microfinance Banks", "بنوك التمويل الأصغر", "Exchange & Remittance", "صرف وتحويل", "Currency Exchange", "صرف العملات", "Money Transfer", "تحويل الأموال", "Remittance Services", "خدمات الحوالات", "Money Changers", "محلات الصرافة", "Foreign Exchange Trading", "تداول العملات الأجنبية", "Insurance", "التأمين", "Health Insurance", "تأمين صحي", "Life Insurance", "تأمين الحياة", "Car Insurance", "تأمين السيارات", "Property Insurance", "تأمين الممتلكات", "Travel Insurance", "تأمين السفر", "Medical Malpractice Insurance", "تأمين ضد الأخطاء الطبية", "Investment & Brokerage", "استثمار ووساطة", "Brokerage Firms", "شركات الوساطة", "Asset Management", "إدارة الأصول", "Stock Brokers", "سماسرة الأسهم", "Mutual Funds", "صناديق الاستثمار", "Private Equity", "الأسهم الخاصة", "Venture Capital", "رأس المال المغامر", "Fintech", "تقنية مالية", "Payment Solutions", "حلول الدفع", "Digital Wallets", "محافظ رقمية", "Crowdfunding Platforms", "منصات التمويل الجماعي", "Online Lending", "الإقراض عبر الإنترنت", "Crypto Exchanges", "منصات تداول العملات الرقمية"]
+                },
+                {
+                    name: "Real Estate",
+                    nameAr: "العقار",
+                    keywords: ["Real Estate", "العقار", "Agencies", "وكالات", "Real Estate Agencies", "وكالات العقارات", "Property Consultants", "مستشارين عقاريين", "Rental Agencies", "وكالات التأجير", "Brokerage", "وساطة", "Real Estate Marketing", "تسويق العقارات", "Developers", "مطورون", "Commercial Developers", "مطورون تجاريون", "Residential Developers", "مطورون سكنيون", "Mixed-use Developers", "مطورون متعددة الاستخدام", "Land Developers", "مطورون أراضي", "Industrial Developers", "مطورون صناعيون", "Property Management", "إدارة الأملاك", "Residential Management", "إدارة سكنية", "Commercial Management", "إدارة تجارية", "Facility Management", "إدارة المرافق", "Homeowners Association", "جمعيات الملاك", "Rent Collection Services", "خدمات تحصيل الإيجار", "Appraisal", "تقييم عقاري", "Property Appraisal", "تقييم الممتلكات", "Land Surveyors", "مساحين الأراضي", "Valuation Services", "خدمات التقييم", "Real Estate Inspection", "فحص العقارات", "Assessment & Consultation", "التقييم والاستشارة"]
+                }
+            ];
+            
+            // Add the remaining Level 1 categories with all their Level 2 subcategories
+            const additionalCategories = [
+                {
+                    name: "Construction",
+                    nameAr: "الإنشاءات",
+                    keywords: ["Construction", "الإنشاءات", "General Contracting", "مقاولات عامة", "Building Construction", "إنشاء المباني", "Renovation", "التجديد", "Project Management", "إدارة المشاريع", "Turnkey Projects", "مشاريع تسليم المفتاح", "Demolition Services", "خدمات الهدم", "Civil & Infrastructure", "الأعمال المدنية والبنية التحتية", "Road Construction", "بناء الطرق", "Bridges", "الجسور", "Tunnels", "الأنفاق", "Airports", "المطارات", "Railway Construction", "بناء السكك الحديدية", "Ports & Harbors", "الموانئ والمرافئ", "MEP", "ميكانيكا وكهرباء وسباكة", "HVAC Installations", "تركيب التكييف", "Electrical Installations", "تركيب كهرباء", "Plumbing Installations", "تركيب السباكة", "Fire Fighting Systems", "أنظمة مكافحة الحريق", "Elevator Installation", "تركيب المصاعد", "Finishing & Fit-out", "التشطيبات والتجهيز", "Interior Finishing", "تشطيبات داخلية", "Gypsum Works", "أعمال الجبس", "Flooring", "أرضيات", "Painting", "الطلاء", "Ceiling Works", "أعمال السقف", "Building Materials", "مواد البناء", "Cement & Concrete", "أسمنت وخرسانة", "Steel & Metals", "حديد ومعادن", "Timber & Wood", "خشب", "Tiles & Ceramics", "بلاط وسيراميك", "Glass", "زجاج", "Paint & Coatings", "دهانات وطلاءات", "Heavy Equipment", "معدات ثقيلة", "Equipment Rental", "تأجير المعدات", "Cranes", "رافعات", "Excavators", "حفارات", "Bulldozers", "جرافات", "Forklifts", "رافعات شوكية", "Concrete Pumps", "مضخات الخرسانة"]
+                },
+                {
+                    name: "Manufacturing & Industrial",
+                    nameAr: "الصناعة",
+                    keywords: ["Manufacturing & Industrial", "الصناعة", "Food Manufacturing", "تصنيع غذائي", "Dairy Products", "منتجات الألبان", "Bakery Products", "منتجات المخابز", "Meat Processing", "معالجة اللحوم", "Confectionery", "حلويات", "Beverage Production", "إنتاج المشروبات", "Date Processing", "معالجة التمور", "Plastics & Rubber", "بلاستيك ومطاط", "Plastic Products", "منتجات بلاستيكية", "Rubber Products", "منتجات مطاطية", "Packaging Materials", "مواد التغليف", "Pipes & Fittings", "أنابيب وتركيبات", "Synthetic Fibers", "ألياف صناعية", "Metals & Fabrication", "معادن وتصنيع", "Metal Fabrication", "تصنيع المعادن", "Steel Products", "منتجات الصلب", "Aluminum Products", "منتجات الألمنيوم", "Metal Casting", "صب المعادن", "Metal Recycling", "إعادة تدوير المعادن", "Chemicals", "كيماويات", "Industrial Chemicals", "كيماويات صناعية", "Cleaning Chemicals", "مواد التنظيف", "Fertilizers", "أسمدة", "Paints & Coatings", "دهانات وطلاءات", "Pharmaceuticals", "أدوية", "Textiles & Garments", "المنسوجات والملابس", "Textile Manufacturing", "صناعة النسيج", "Garment Production", "إنتاج الملابس", "Carpets & Rugs", "السجاد", "Leather Products", "منتجات الجلد", "Yarn & Thread", "خيوط ونسيج", "Machinery & Equipment", "آلات ومعدات", "Industrial Machinery", "آلات صناعية", "Agricultural Machinery", "آلات زراعية", "Packaging Machinery", "آلات التعبئة", "Electrical Equipment", "معدات كهربائية", "HVAC Equipment", "معدات التكييف", "Electronics Manufacturing", "تصنيع الإلكترونيات", "Consumer Electronics", "إلكترونيات استهلاكية", "Semiconductors", "أشباه الموصلات", "Solar Panels", "ألواح شمسية", "Medical Devices", "أجهزة طبية", "Electronic Components", "مكونات إلكترونية", "Printing & Packaging", "طباعة وتعبئة", "Printing Services", "خدمات الطباعة", "Paper Products", "منتجات ورقية", "Cardboard Production", "إنتاج الكرتون", "Labels & Tags", "الملصقات والبطاقات", "Packaging Solutions", "حلول التغليف"]
+                },
+                {
+                    name: "Energy & Utilities",
+                    nameAr: "الطاقة والمرافق",
+                    keywords: ["Energy & Utilities", "الطاقة والمرافق", "Oil & Gas Services", "خدمات النفط والغاز", "Exploration & Drilling", "الاستكشاف والحفر", "Oilfield Equipment", "معدات حقول النفط", "Refining", "التكرير", "Distribution", "التوزيع", "Pipeline Services", "خدمات خطوط الأنابيب", "Well Maintenance", "صيانة الآبار", "Petrochemicals", "بتروكيماويات", "Petrochemical Manufacturing", "تصنيع البتروكيماويات", "Plastic Resins", "راتنجات بلاستيكية", "Chemical Feedstocks", "المواد الخام الكيميائية", "Fertilizer Production", "إنتاج الأسمدة", "Synthetic Polymers", "بوليمرات اصطناعية", "Power Generation", "توليد الطاقة", "Electricity Generation", "توليد الكهرباء", "Fossil Fuel Plants", "محطات الوقود الأحفوري", "Nuclear Plants", "محطات نووية", "Hydroelectric Plants", "محطات كهرومائية", "Wind Farms", "مزارع الرياح", "Turbine Maintenance", "صيانة التوربينات", "Renewable Energy", "الطاقة المتجددة", "Solar Power", "طاقة شمسية", "Wind Power", "طاقة الرياح", "Biomass Energy", "طاقة حيوية", "Geothermal Energy", "طاقة حرارية أرضية", "Hydrogen Energy", "طاقة الهيدروجين", "Energy Storage Solutions", "حلول تخزين الطاقة", "Water & Wastewater", "المياه والصرف الصحي", "Water Treatment", "معالجة المياه", "Sewage Treatment", "معالجة الصرف الصحي", "Desalination Plants", "محطات تحلية المياه", "Water Distribution", "توزيع المياه", "Irrigation Services", "خدمات الري", "Stormwater Management", "إدارة مياه الأمطار", "Waste Management", "إدارة النفايات", "Solid Waste Collection", "جمع النفايات الصلبة", "Recycling Services", "خدمات إعادة التدوير", "Hazardous Waste", "النفايات الخطرة", "Landfill Management", "إدارة المدافن", "Composting", "التسميد", "E-Waste Recycling", "تدوير النفايات الإلكترونية"]
+                },
+                {
+                    name: "IT & Software",
+                    nameAr: "تقنية المعلومات",
+                    keywords: ["IT & Software", "تقنية المعلومات", "Software Development", "تطوير البرمجيات", "Web Development", "تطوير الويب", "Mobile App Development", "تطوير تطبيقات الهواتف", "Enterprise Software", "برمجيات المؤسسات", "Game Development", "تطوير الألعاب", "Custom Software", "برمجيات مخصصة", "IT Services & Support", "خدمات ودعم تقنية المعلومات", "Technical Support", "الدعم الفني", "Network Setup", "إعداد الشبكات", "System Integration", "تكامل الأنظمة", "Managed IT Services", "الخدمات المُدارة", "IT Outsourcing", "الاستعانة بمصادر خارجية لتقنية المعلومات", "Cloud & Cybersecurity", "السحابة والأمن السيبراني", "Cloud Computing", "الحوسبة السحابية", "Data Storage", "تخزين البيانات", "Cybersecurity", "الأمن السيبراني", "Backup Solutions", "حلول النسخ الاحتياطي", "Disaster Recovery", "استعادة البيانات بعد الكوارث", "Data & AI", "البيانات والذكاء الاصطناعي", "Data Analytics", "تحليل البيانات", "AI Development", "تطوير الذكاء الاصطناعي", "Machine Learning", "تعلم الآلة", "Big Data Solutions", "حلول البيانات الضخمة", "Data Management", "إدارة البيانات", "Web & Mobile Apps", "تطبيقات الويب والهواتف", "eCommerce Development", "تطوير التجارة الإلكترونية", "UI/UX Design", "تصميم واجهة المستخدم وتجربة المستخدم", "Progressive Web Apps", "تطبيقات الويب التقدمية", "Maintenance & Updates", "الصيانة والتحديثات", "API Integration", "تكامل واجهات البرمجة"]
+                },
+                {
+                    name: "Telecommunications",
+                    nameAr: "الاتصالات",
+                    keywords: ["Telecommunications", "الاتصالات", "Mobile Operators", "مشغلي الاتصالات المتنقلة", "Voice Plans", "خطط المكالمات", "Data Plans", "خطط البيانات", "SIM Cards", "بطاقات SIM", "Prepaid Services", "خدمات مسبقة الدفع", "Postpaid Services", "خدمات مفوترة", "Internet Providers", "مزودو الإنترنت", "Fiber Optic Internet", "إنترنت الألياف البصرية", "DSL Services", "خدمات DSL", "Satellite Internet", "إنترنت فضائي", "Wi-Fi Hotspots", "نقاط اتصال الواي فاي", "Broadband", "النطاق العريض", "Satellite & VSAT", "الأقمار الصناعية وVSAT", "Satellite TV", "تلفزيون الأقمار الصناعية", "Satellite Communication", "اتصالات الأقمار الصناعية", "VSAT Equipment", "معدات VSAT", "Satellite Phone", "هاتف الأقمار الصناعية", "Ground Stations", "محطات أرضية", "Telecom Equipment Suppliers", "موردو معدات الاتصالات", "Network Hardware", "أجهزة الشبكات", "Telecom Towers", "أبراج الاتصالات", "Cables & Accessories", "الكابلات والاكسسوارات", "Antennas", "الهوائيات", "Switches & Routers", "المحولات وأجهزة التوجيه"]
+                },
+                {
+                    name: "Education & Training",
+                    nameAr: "التعليم والتدريب",
+                    keywords: ["Education & Training", "التعليم والتدريب", "Schools", "مدارس", "Private Schools", "مدارس خاصة", "Public Schools", "مدارس حكومية", "International Schools", "مدارس دولية", "Islamic Schools", "مدارس إسلامية", "Special Needs Schools", "مدارس احتياجات خاصة", "Montessori Schools", "مدارس مونتيسوري", "Universities & Colleges", "جامعات وكليات", "Universities", "جامعات", "Colleges", "كليات", "Community Colleges", "كليات المجتمع", "Technical Colleges", "كليات التقنية", "Online Universities", "جامعات عبر الإنترنت", "Open Universities", "جامعات مفتوحة", "Institutes", "معاهد", "Language Institutes", "معاهد اللغات", "Computer Training", "تدريب الحاسوب", "Technical Institutes", "معاهد تقنية", "Culinary Institutes", "معاهد الطهي", "Aviation Schools", "مدارس الطيران", "Vocational Institutes", "معاهد مهنية", "Tutoring & Coaching", "دروس خصوصية وتدريب", "Academic Tutoring", "دروس خصوصية أكاديمية", "Test Preparation", "التحضير للاختبارات", "Music Lessons", "دروس الموسيقى", "Art Classes", "صفوف الفن", "Sports Coaching", "تدريب رياضي", "Language Tutors", "مدرسو اللغات", "Corporate Training", "التدريب المهني", "Leadership Training", "التدريب القيادي", "Soft Skills Training", "تدريب المهارات الشخصية", "IT Training", "تدريب تقنية المعلومات", "Sales Training", "تدريب المبيعات", "Safety Training", "تدريب السلامة", "Compliance Training", "تدريب الامتثال"]
+                },
+                {
+                    name: "Travel & Tourism",
+                    nameAr: "السفر والسياحة",
+                    keywords: ["Travel & Tourism", "السفر والسياحة", "Travel Agencies", "وكالات السفر", "General Travel Agencies", "وكالات سفر عامة", "Corporate Travel", "سفر الشركات", "Leisure Travel", "سفر الترفيه", "Group Travel", "سفر جماعي", "Custom Tour Planning", "تخطيط الجولات الخاصة", "Tour Operators", "منظمو الرحلات", "Local Tours", "جولات محلية", "Desert Safaris", "رحلات الصحراء", "Adventure Tours", "جولات المغامرة", "Historical Tours", "جولات تاريخية", "Eco Tours", "جولات بيئية", "Cultural Tours", "جولات ثقافية", "Hajj & Umrah Services", "خدمات الحج والعمرة", "Hajj Packages", "باقات الحج", "Umrah Packages", "باقات العمرة", "Visa Processing", "إجراءات التأشيرات", "Accommodation Booking", "حجز السكن", "Transportation Services", "خدمات النقل", "Mutawwifs & Guides", "مطوفون ومرشدون", "Tourist Guides", "المرشدون السياحيون", "Cultural Guides", "مرشدون ثقافيون", "Museum Guides", "مرشدون متاحف", "Heritage Guides", "مرشدون للتراث", "Nature Guides", "مرشدون للطبيعة", "Language Speaking Guides", "مرشدون متعدد اللغات", "Special Interest Guides", "مرشدون للبرامج الخاصة"]
+                },
+                {
+                    name: "Hospitality & Lodging",
+                    nameAr: "الضيافة والإقامة",
+                    keywords: ["Hospitality & Lodging", "الضيافة والإقامة", "Hotels", "فنادق", "Luxury Hotels", "فنادق فاخرة", "Business Hotels", "فنادق رجال الأعمال", "Boutique Hotels", "فنادق بوتيك", "Budget Hotels", "فنادق اقتصادية", "Airport Hotels", "فنادق المطار", "Extended Stay Hotels", "فنادق الإقامة الطويلة", "Serviced Apartments", "شقق فندقية", "Long-Term Stay", "إقامة طويلة", "Short-Term Stay", "إقامة قصيرة", "Furnished Suites", "أجنحة مفروشة", "Condo-Hotels", "فنادق الشقق", "Co-living Spaces", "مساحات السكن المشترك", "Resorts", "منتجعات", "Beach Resorts", "منتجعات الشاطئ", "Desert Resorts", "منتجعات الصحراء", "Spa Resorts", "منتجعات السبا", "Family Resorts", "منتجعات عائلية", "Eco Resorts", "منتجعات بيئية", "Luxury Resorts", "منتجعات فاخرة", "Furnished Units & Vacation Rentals", "وحدات مفروشة وتأجير العطلات", "Holiday Homes", "بيوت العطلات", "Vacation Rentals", "تأجير العطلات", "Chalets", "شاليهات", "Villas", "فلل", "Guest Houses", "بيوت الضيافة", "Bed & Breakfast", "مبيت وإفطار"]
+                },
+                {
+                    name: "Entertainment & Events",
+                    nameAr: "الترفيه والفعاليات",
+                    keywords: ["Entertainment & Events", "الترفيه والفعاليات", "Cinemas", "سينما", "Multiplex", "صالات متعددة", "IMAX Theatres", "صالات IMAX", "Independent Cinemas", "صالات مستقلة", "Drive-in Theatres", "دور السينما بالسيارات", "3D Theatres", "صالات ثلاثية الأبعاد", "Theme & Adventure Parks", "حدائق ترفيهية ومغامرات", "Theme Parks", "حدائق ترفيهية", "Water Parks", "حدائق مائية", "Adventure Parks", "حدائق المغامرة", "Indoor Playgrounds", "ملاعب داخلية", "Heritage Parks", "حدائق التراث", "Virtual Reality Parks", "حدائق الواقع الافتراضي", "Event Management", "إدارة الفعاليات", "Corporate Events", "فعاليات الشركات", "Concerts", "حفلات موسيقية", "Festivals", "مهرجانات", "Exhibitions", "معارض", "Conferences", "مؤتمرات", "Wedding Planning", "تنظيم حفلات الزفاف", "Trade Shows", "معارض تجارية", "Wedding Halls", "قاعات الأفراح", "Banquet Halls", "قاعات الولائم", "Luxury Wedding Halls", "قاعات زفاف فاخرة", "Outdoor Weddings", "حفلات زفاف في الهواء الطلق", "Community Halls", "قاعات المجتمع", "Hotel Ballrooms", "قاعات الفنادق", "Marquee Tents", "خيم القاعات", "Kids Play Areas", "مناطق لعب الأطفال", "Indoor Play Centres", "مراكز اللعب الداخلية", "Trampoline Parks", "حدائق الترامبولين", "Soft Play Areas", "مناطق اللعب الناعمة", "Arcade Centres", "مراكز الألعاب", "Children's Entertainment Centers", "مراكز الترفيه للأطفال", "Laser Tag", "قتال الليزر"]
+                },
+                {
+                    name: "Sports & Fitness",
+                    nameAr: "الرياضة واللياقة",
+                    keywords: ["Sports & Fitness", "الرياضة واللياقة", "Gyms & Fitness Centers", "نوادي رياضية ومراكز لياقة", "Fitness Gyms", "نوادي اللياقة البدنية", "CrossFit Boxes", "صالات كروس فيت", "Yoga Studios", "استوديوهات اليوغا", "Pilates Studios", "استوديوهات بيلاتس", "Spin Classes", "صفوف الدراجة الثابتة", "Bodybuilding Gyms", "نوادي كمال الأجسام", "Sports Clubs", "أندية رياضية", "Football Clubs", "أندية كرة القدم", "Basketball Clubs", "أندية كرة السلة", "Swimming Clubs", "أندية السباحة", "Tennis Clubs", "أندية التنس", "Cricket Clubs", "أندية الكريكيت", "Athletics Clubs", "أندية ألعاب القوى", "Martial Arts & Combat Sports", "فنون القتال والرياضات القتالية", "Taekwondo", "تايكوندو", "Karate", "كاراتيه", "Judo", "جودو", "Boxing", "الملاكمة", "Mixed Martial Arts", "الفنون القتالية المختلطة", "Aikido", "آيكيدو", "Sports Stores", "متاجر الرياضة", "Sportswear Stores", "متاجر الملابس الرياضية", "Equipment Stores", "متاجر المعدات الرياضية", "Outdoor Gear", "معدات الهواء الطلق", "Cycling Shops", "متاجر الدراجات", "Golf Shops", "متاجر الجولف", "Fishing Gear Stores", "متاجر معدات الصيد"]
+                },
+                {
+                    name: "Transportation & Logistics",
+                    nameAr: "النقل واللوجستيات",
+                    keywords: ["Transportation & Logistics", "النقل واللوجستيات", "Freight & Shipping", "الشحن والنقل", "Cargo Shipping", "الشحن البحري", "Air Freight", "الشحن الجوي", "Road Freight", "الشحن البري", "Customs Brokers", "وكلاء الجمارك", "Freight Forwarders", "شركات الشحن", "Logistics Management", "إدارة اللوجستيات", "Couriers & Delivery", "الشحن والتوصيل", "Local Couriers", "خدمات التوصيل المحلية", "International Couriers", "خدمات التوصيل الدولية", "Last-Mile Delivery", "التوصيل إلى الميل الأخير", "Express Delivery", "التوصيل السريع", "Parcel Lockers", "خزائن الطرود", "On-Demand Delivery", "التوصيل حسب الطلب", "Warehousing", "التخزين", "Storage Facilities", "مرافق التخزين", "Cold Storage", "التخزين البارد", "Fulfillment Centers", "مراكز التنفيذ", "Bonded Warehouses", "مستودعات جمركية", "Distribution Centers", "مراكز التوزيع", "Inventory Management", "إدارة المخزون", "Customs Clearance", "التخليص الجمركي", "Customs Documentation", "وثائق الجمارك", "Import Clearance", "فسح الواردات", "Export Clearance", "فسح الصادرات", "Duty Payment Services", "خدمات دفع الرسوم", "Clearance Agents", "وكلاء التخليص", "Tariff Consulting", "استشارات الرسوم الجمركية", "Public Transport", "النقل العام", "Bus Services", "خدمات الحافلات", "Rail Services", "خدمات السكك الحديدية", "Metro Services", "خدمات المترو", "Taxi Services", "خدمات سيارات الأجرة", "Ride-Sharing", "مشاركة الركوب", "Carpooling", "سيارات مشتركة", "Vehicle Logistics", "لوجستيات المركبات", "Auto Transport", "نقل السيارات", "Vehicle Storage", "تخزين المركبات", "Fleet Management", "إدارة الأساطيل", "Vehicle Relocation", "نقل المركبات", "Vehicle Import/Export", "استيراد/تصدير المركبات", "Vehicle Registration Services", "خدمات تسجيل المركبات"]
+                },
+                {
+                    name: "Agriculture & Livestock",
+                    nameAr: "الزراعة والثروة الحيوانية",
+                    keywords: ["Agriculture & Livestock", "الزراعة والثروة الحيوانية", "Farms", "مزارع", "Crop Farms", "مزارع المحاصيل", "Livestock Farms", "مزارع المواشي", "Poultry Farms", "مزارع الدواجن", "Fish Farms", "مزارع الأسماك", "Organic Farms", "مزارع عضوية", "Aquaculture", "الاستزراع المائي", "Date Farms & Produce", "مزارع التمور والمحاصيل", "Date Farms", "مزارع التمور", "Fruit Orchards", "بساتين الفاكهة", "Vegetable Farms", "مزارع الخضروات", "Greenhouses", "البيوت الزجاجية", "Date Packaging", "تعبئة التمور", "Honey Production", "إنتاج العسل", "Poultry & Livestock", "الدواجن والثروة الحيوانية", "Chicken Farms", "مزارع الدجاج", "Cattle Farms", "مزارع الأبقار", "Sheep Farms", "مزارع الأغنام", "Goat Farms", "مزارع الماعز", "Camel Breeding", "تربية الإبل", "Dairy Farms", "مزارع الألبان", "Agricultural Supplies", "مستلزمات زراعية", "Seeds & Fertilizers", "البذور والأسمدة", "Farm Equipment", "معدات المزارع", "Animal Feed", "أعلاف الحيوانات", "Pesticides", "مبيدات الآفات", "Irrigation Equipment", "معدات الري", "Greenhouse Supplies", "مستلزمات البيوت الزجاجية", "Veterinary Services", "خدمات بيطرية", "Large Animal Veterinary", "طب بيطري للحيوانات الكبيرة", "Small Animal Veterinary", "طب بيطري للحيوانات الصغيرة", "Mobile Veterinary Services", "خدمات بيطرية متنقلة", "Veterinary Pharmacies", "صيدليات بيطرية", "Livestock Vaccination", "تحصين المواشي", "Animal Surgery", "جراحة الحيوانات", "Animal Markets", "أسواق الحيوانات", "Livestock Markets", "أسواق المواشي", "Camel Markets", "أسواق الإبل", "Poultry Markets", "أسواق الدواجن", "Animal Auctions", "مزادات الحيوانات", "Falconry Markets", "أسواق الصقور", "Pet Markets", "أسواق الحيوانات الأليفة"]
+                },
+                {
+                    name: "Government & Public Services",
+                    nameAr: "الجهات الحكومية والخدمات العامة",
+                    keywords: ["Government & Public Services", "الجهات الحكومية والخدمات العامة", "Ministries & Agencies", "وزارات وهيئات", "Ministry of Interior", "وزارة الداخلية", "Ministry of Health", "وزارة الصحة", "Ministry of Education", "وزارة التعليم", "Ministry of Commerce", "وزارة التجارة", "Ministry of Foreign Affairs", "وزارة الخارجية", "Ministry of Justice", "وزارة العدل", "Ministry of Environment, Water and Agriculture", "وزارة البيئة والمياه والزراعة", "Municipal Services", "خدمات بلدية", "City Councils", "المجالس البلدية", "Building Permits", "تصاريح البناء", "Waste Collection", "جمع القمامة", "Public Parks", "الحدائق العامة", "Public Transportation Management", "إدارة النقل العام", "Street Lighting", "إنارة الشوارع", "Civil Affairs & Passports", "الأحوال المدنية والجوازات", "Civil Status Services", "الأحوال المدنية", "Passport Offices", "مكاتب الجوازات", "National ID Services", "خدمات الهوية الوطنية", "Family Records", "سجلات الأسرة", "Birth & Death Certificates", "شهادات الميلاد والوفاة", "Courts & Legal System", "المحاكم والنظام القضائي", "Civil Courts", "المحاكم المدنية", "Criminal Courts", "المحاكم الجنائية", "Commercial Courts", "المحاكم التجارية", "Labor Courts", "محاكم العمل", "Family Courts", "محاكم الأسرة", "Administrative Courts", "المحاكم الإدارية", "Traffic & Licensing", "المرور والتراخيص", "Traffic Police", "شرطة المرور", "Driving License Issuance", "إصدار رخص القيادة", "Vehicle Registration", "تسجيل المركبات", "Fines Payment", "دفع المخالفات", "Inspection Centers", "مراكز الفحص الدوري", "Vehicle Permit Services", "خدمات تصاريح المركبات", "Public Safety & Emergency Services", "السلامة العامة والطوارئ", "Fire Department", "الدفاع المدني", "Police Department", "الشرطة", "Ambulance Services", "خدمات الإسعاف", "Disaster Management", "إدارة الكوارث", "Emergency Call Centers", "مراكز الطوارئ", "Coast Guard", "حرس الحدود", "Utility Authorities", "هيئات المرافق", "Water Authority", "هيئة المياه", "Electricity Authority", "هيئة الكهرباء", "Telecommunications Authority", "هيئة الاتصالات", "Postal Services", "الخدمات البريدية", "Municipal Development Authority", "هيئة التطوير البلدي", "Transport Authority", "هيئة النقل"]
+                },
+                {
+                    name: "Nonprofit & Community",
+                    nameAr: "غير ربحي ومجتمعي",
+                    keywords: ["Nonprofit & Community", "غير ربحي ومجتمعي", "Charities", "جمعيات خيرية", "Relief Organizations", "منظمات إغاثة", "Orphanages", "دور الأيتام", "Poverty Alleviation", "مكافحة الفقر", "Food Banks", "بنوك الطعام", "Disaster Relief", "الإغاثة في الكوارث", "Medical Aid Charities", "جمعيات المساعدات الطبية", "Foundations", "مؤسسات", "Educational Foundations", "مؤسسات تعليمية", "Healthcare Foundations", "مؤسسات الرعاية الصحية", "Environmental Foundations", "مؤسسات البيئة", "Social Welfare Foundations", "مؤسسات الرعاية الاجتماعية", "Cultural Foundations", "مؤسسات الثقافة", "Research Foundations", "مؤسسات البحث", "Volunteer Groups", "مجموعات التطوع", "Community Volunteers", "متطوعون المجتمع", "Youth Volunteer Groups", "مجموعات الشباب المتطوعين", "Blood Donation Drives", "حملات التبرع بالدم", "Environmental Cleanups", "تنظيف البيئة", "Event Volunteers", "متطوعو الفعاليات", "Neighborhood Watch", "مراقبة الأحياء", "NGO Services", "خدمات المنظمات غير الحكومية", "Training & Capacity Building", "التدريب وبناء القدرات", "Fundraising Support", "دعم جمع التبرعات", "Advocacy", "المناصرة", "Community Development", "تنمية المجتمع", "Research & Policy", "البحث والسياسات", "Volunteer Management", "إدارة المتطوعين"]
+                },
+                {
+                    name: "Religious Organizations",
+                    nameAr: "جهات دينية",
+                    keywords: ["Religious Organizations", "جهات دينية", "Mosques", "مساجد", "Friday Mosques", "مساجد الجمعة", "Community Mosques", "مساجد المجتمع", "Prayer Rooms", "مصليات", "Eid Mosques", "مصلى العيد", "Women's Prayer Areas", "أماكن صلاة النساء", "Jumu'ah Sermons", "خطب الجمعة", "Quran Schools", "مدارس القرآن", "Hafiz Schools", "مدارس تحفيظ القرآن", "Weekend Quran Classes", "حصص القرآن الأسبوعية", "Online Quran Classes", "حصص القرآن عبر الإنترنت", "Tajweed Classes", "دروس التجويد", "Quranic Studies Institutes", "معاهد الدراسات القرآنية", "Quran Memorization Circles", "حلقات حفظ القرآن", "Islamic Centers", "مراكز إسلامية", "Da'wah Centers", "مراكز الدعوة", "Lecture Halls", "قاعات المحاضرات", "Islamic Libraries", "مكتبات إسلامية", "Counseling & Guidance", "الإرشاد والنصح", "Reverts Support Groups", "مجموعات دعم المعتنقين حديثًا", "Charity Wings", "أجنحة خيرية"]
+                },
+                {
+                    name: "Media & Advertising",
+                    nameAr: "الإعلام والإعلان",
+                    keywords: ["Media & Advertising", "الإعلام والإعلان", "Advertising Agencies", "وكالات الإعلان", "Full-service Agencies", "وكالات متكاملة الخدمات", "Creative Agencies", "وكالات إبداعية", "Media Buying Agencies", "وكالات شراء الوسائط", "Digital Agencies", "وكالات رقمية", "Outdoor Advertising", "الإعلانات الخارجية", "Brand Activation Agencies", "وكالات تفعيل العلامات التجارية", "Digital Marketing", "التسويق الرقمي", "Social Media Marketing", "التسويق عبر وسائل التواصل الاجتماعي", "SEO Services", "خدمات تحسين محركات البحث", "Content Marketing", "التسويق بالمحتوى", "Email Marketing", "التسويق عبر البريد الإلكتروني", "Influencer Marketing", "تسويق المؤثرين", "Affiliate Marketing", "التسويق بالعمولة", "Public Relations", "العلاقات العامة", "PR Agencies", "وكالات العلاقات العامة"]
+                }
+            ];
+            
+            // Merge additional categories with default ones
+            const allCategories = defaultCategories.concat(additionalCategories);
+            
+            // Save these comprehensive categories in the admin format to localStorage
+            const adminFormatCategories = allCategories.map(cat => ({
+                english: cat.name,
+                arabic: cat.nameAr,
+                keywords: cat.keywords,
+                active: true
+            }));
+            
+            localStorage.setItem('logodaleel_categories', JSON.stringify(adminFormatCategories));
+            return allCategories;
+        }
+        
+        function renderCategoriesTable(categories) {
+            const tbody = document.getElementById('categoriesTableBody');
+            
+            if (categories.length === 0) {
+                tbody.innerHTML = `
+                    <!-- Add Level 1 Category Row -->
+                    <tr class="add-level1-row" onclick="addLevel1Category()" title="Click to add a new Level 1 category">
+                        <td colspan="10" class="add-category-cell">
+                            <div class="add-category-content">
+                                <span class="add-icon">➕</span>
+                                <span class="add-text">Click here to add a new Level 1 category</span>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="10">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📂</div>
+                                <p>Failed to load categories from CSV file</p>
+                                <button class="btn btn-primary" onclick="initializeAllCategories()">
+                                    🔄 Load All Categories
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Group categories by hierarchy for better display
+            const groupedCategories = groupCategoriesByHierarchy(categories);
+            
+            let tableHTML = `
+                <!-- Add Level 1 Category Row -->
+                <tr class="add-level1-row" onclick="addLevel1Category()" title="Click to add a new Level 1 category">
+                    <td colspan="10" class="add-category-cell">
+                        <div class="add-category-content">
+                            <span class="add-icon">➕</span>
+                            <span class="add-text">Click here to add a new Level 1 category</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            categories.forEach((category, index) => {
+                // Extract the exact CSV data structure fields
+                const level1 = category.level1 || '';
+                const level1Ar = category.level1Ar || '';
+                const level2 = category.level2 || '';
+                const level2Ar = category.level2Ar || '';
+                const level3 = category.level3 || '';
+                const level3Ar = category.level3Ar || '';
+                const level1Keywords = category.level1Keywords || '';
+                const level2Keywords = category.level2Keywords || '';
+                const level3Keywords = category.level3Keywords || '';
+                
+                // Count subcategories for this row
+                const level2Count = level1 && !level2 ? countLevel2Subcategories(categories, level1) : 0;
+                const level3Count = level2 && !level3 ? countLevel3Subcategories(categories, level1, level2) : 0;
+                
+                tableHTML += `
+                    <tr data-category-index="${index}">
+                        <td class="editable-cell category-name-cell" data-field="level1" onclick="editCell(this, 'text')">
+                            <div class="category-name-en">${level1}</div>
+                            ${level2Count > 0 ? `
+                                <div class="subcategory-count" onclick="event.stopPropagation(); addLevel2Category('${level1}', ${index})" title="Click to add Level 2 subcategory">
+                                    <span class="count-number">${level2Count}</span>
+                                </div>
+                            ` : level1 && !level2 ? `
+                                <div class="subcategory-count" onclick="event.stopPropagation(); addLevel2Category('${level1}', ${index})" title="Click to add Level 2 subcategory">
+                                    <span class="count-number">0</span>
+                                </div>
+                            ` : ''}
+                        </td>
+                        <td class="editable-cell" data-field="level1Ar" onclick="editCell(this, 'text')">
+                            <div class="category-name-ar" dir="rtl">${level1Ar}</div>
+                        </td>
+                        <td class="editable-cell category-name-cell" data-field="level2" onclick="editCell(this, 'text')">
+                            <div class="category-name-en">${level2}</div>
+                            ${level3Count > 0 ? `
+                                <div class="subcategory-count" onclick="event.stopPropagation(); addLevel3Category('${level1}', '${level2}', ${index})" title="Click to add Level 3 subcategory">
+                                    <span class="count-number">${level3Count}</span>
+                                </div>
+                            ` : level2 && !level3 ? `
+                                <div class="subcategory-count" onclick="event.stopPropagation(); addLevel3Category('${level1}', '${level2}', ${index})" title="Click to add Level 3 subcategory">
+                                    <span class="count-number">0</span>
+                                </div>
+                            ` : ''}
+                        </td>
+                        <td class="editable-cell" data-field="level2Ar" onclick="editCell(this, 'text')">
+                            <div class="category-name-ar" dir="rtl">${level2Ar}</div>
+                        </td>
+                        <td class="editable-cell category-name-cell" data-field="level3" onclick="editCell(this, 'text')">
+                            <div class="category-name-en">${level3}</div>
+                        </td>
+                        <td class="editable-cell" data-field="level3Ar" onclick="editCell(this, 'text')">
+                            <div class="category-name-ar" dir="rtl">${level3Ar}</div>
+                        </td>
+                        <td class="editable-cell keywords-cell" data-field="level1Keywords" onclick="editCell(this, 'textarea')">
+                            <div class="keywords-preview" title="${level1Keywords}">${level1Keywords || 'No keywords'}</div>
+                        </td>
+                        <td class="editable-cell keywords-cell" data-field="level2Keywords" onclick="editCell(this, 'textarea')">
+                            <div class="keywords-preview" title="${level2Keywords}">${level2Keywords || 'No keywords'}</div>
+                        </td>
+                        <td class="editable-cell keywords-cell" data-field="level3Keywords" onclick="editCell(this, 'textarea')">
+                            <div class="keywords-preview" title="${level3Keywords}">${level3Keywords || 'No keywords'}</div>
+                        </td>
+                        <td>
+                            <div class="category-actions-cell">
+                                <button class="btn btn-danger btn-sm" onclick="deleteCategory(${index})" title="Delete">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = tableHTML;
+            
+            // Load company counts for each category
+            loadCategoryCounts();
+        }
+        
+        // Inline editing functions for spreadsheet-like interface
+        function editCell(cell, inputType) {
+            // Prevent editing if already editing
+            if (cell.classList.contains('editing')) return;
+            
+            const currentValue = getCellValue(cell);
+            const field = cell.dataset.field;
+            
+            cell.classList.add('editing');
+            
+            let input;
+            if (inputType === 'textarea') {
+                input = document.createElement('textarea');
+                input.value = currentValue;
+                input.style.height = '60px';
+            } else {
+                input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentValue;
+            }
+            
+            // Set direction for Arabic fields
+            if (field === 'nameAr') {
+                input.dir = 'rtl';
+            }
+            
+            cell.innerHTML = '';
+            cell.appendChild(input);
+            
+            input.focus();
+            input.select();
+            
+            // Save on Enter (or Ctrl+Enter for textarea)
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && (inputType !== 'textarea' || e.ctrlKey)) {
+                    e.preventDefault();
+                    saveCell(cell, input.value);
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelEdit(cell, currentValue);
+                }
+            });
+            
+            // Save on blur
+            input.addEventListener('blur', function() {
+                setTimeout(() => {
+                    if (cell.classList.contains('editing')) {
+                        saveCell(cell, input.value);
+                    }
+                }, 100);
+            });
+        }
+        
+        function getCellValue(cell) {
+            const field = cell.dataset.field;
+            const rowIndex = parseInt(cell.closest('tr').dataset.categoryIndex);
+            const category = currentCategories[rowIndex];
+            
+            if (!category) return '';
+            
+            switch (field) {
+                case 'level1':
+                    return category.level1 || '';
+                case 'level1Ar':
+                    return category.level1Ar || '';
+                case 'level2':
+                    return category.level2 || '';
+                case 'level2Ar':
+                    return category.level2Ar || '';
+                case 'level3':
+                    return category.level3 || '';
+                case 'level3Ar':
+                    return category.level3Ar || '';
+                case 'level1Keywords':
+                    return category.level1Keywords || '';
+                case 'level2Keywords':
+                    return category.level2Keywords || '';
+                case 'level3Keywords':
+                    return category.level3Keywords || '';
+                default:
+                    return '';
+            }
+        }
+        
+        function saveCell(cell, newValue) {
+            const field = cell.dataset.field;
+            const rowIndex = parseInt(cell.closest('tr').dataset.categoryIndex);
+            const category = currentCategories[rowIndex];
+            
+            if (!category) return;
+            
+            // Update the category data
+            switch (field) {
+                case 'level1':
+                    category.level1 = newValue.trim();
+                    break;
+                case 'level1Ar':
+                    category.level1Ar = newValue.trim();
+                    break;
+                case 'level2':
+                    category.level2 = newValue.trim();
+                    break;
+                case 'level2Ar':
+                    category.level2Ar = newValue.trim();
+                    break;
+                case 'level3':
+                    category.level3 = newValue.trim();
+                    break;
+                case 'level3Ar':
+                    category.level3Ar = newValue.trim();
+                    break;
+                case 'level1Keywords':
+                    category.level1Keywords = newValue.trim();
+                    break;
+                case 'level2Keywords':
+                    category.level2Keywords = newValue.trim();
+                    break;
+                case 'level3Keywords':
+                    category.level3Keywords = newValue.trim();
+                    break;
+            }
+            
+            // Update the cell display
+            updateCellDisplay(cell, newValue, field);
+            
+            cell.classList.remove('editing');
+            
+            // Remove the adding state from the row
+            const row = cell.closest('tr');
+            if (row) {
+                row.classList.remove('category-row-adding');
+            }
+            
+            // Auto-save changes
+            autoSaveCategories();
+            
+            // Show save indicator
+            showSaveIndicator('Changes saved automatically');
+        }
+        
+        function cancelEdit(cell, originalValue) {
+            const field = cell.dataset.field;
+            updateCellDisplay(cell, originalValue, field);
+            cell.classList.remove('editing');
+            
+            // Remove the adding state from the row
+            const row = cell.closest('tr');
+            if (row) {
+                row.classList.remove('category-row-adding');
+                
+                // If this was a new category being added (empty values), remove it
+                const rowIndex = parseInt(row.dataset.categoryIndex);
+                const category = currentCategories[rowIndex];
+                if (category && !category.level1 && !category.level2 && !category.level3) {
+                    currentCategories.splice(rowIndex, 1);
+                    renderCategoriesTable(currentCategories);
+                }
+            }
+        }
+        
+        function updateCellDisplay(cell, value, field) {
+            cell.classList.remove('editing');
+            
+            let displayHtml = '';
+            
+            switch (field) {
+                case 'level1':
+                case 'level2':
+                case 'level3':
+                    displayHtml = `<div class="category-name-en">${value}</div>`;
+                    break;
+                case 'level1Ar':
+                case 'level2Ar':
+                case 'level3Ar':
+                    displayHtml = `<div class="category-name-ar" dir="rtl">${value}</div>`;
+                    break;
+                case 'level1Keywords':
+                case 'level2Keywords':
+                case 'level3Keywords':
+                    displayHtml = `<div class="keywords-preview" title="${value}">${value || 'No keywords'}</div>`;
+                    break;
+                default:
+                    displayHtml = value;
+            }
+            
+            cell.innerHTML = displayHtml;
+        }
+        
+        function autoSaveCategories() {
+            // Debounce auto-save
+            clearTimeout(window.autoSaveTimer);
+            window.autoSaveTimer = setTimeout(() => {
+                saveCategoriesToStorage();
+                // Trigger refresh for the main admin dashboard
+                localStorage.setItem('logodaleel_refresh_trigger', Date.now().toString());
+            }, 1000);
+        }
+        
+        function showSaveIndicator(message) {
+            let indicator = document.getElementById('saveIndicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'saveIndicator';
+                indicator.className = 'save-indicator';
+                document.body.appendChild(indicator);
+            }
+            
+            indicator.textContent = message;
+            indicator.style.display = 'block';
+            
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+        
+        function saveCategoriesToStorage() {
+            try {
+                // Convert current categories back to CSV format
+                const csvContent = generateCategoriesCSV();
+                
+                // Convert flat category list back to hierarchical structure for Categories page
+                const hierarchicalData = convertToHierarchicalStructure(currentCategories);
+                
+                // Save to localStorage in the format the Categories page expects
+                localStorage.setItem('logodaleel_categories_hierarchy', JSON.stringify(hierarchicalData));
+                
+                // Also save to legacy format for backward compatibility
+                const legacyFormatCategories = convertToLegacyFormat(currentCategories);
+                localStorage.setItem('logodaleel_categories', JSON.stringify(legacyFormatCategories));
+                
+                // Also save as backup
+                localStorage.setItem('categoriesBackup', JSON.stringify(currentCategories));
+                localStorage.setItem('categoriesCSVBackup', csvContent);
+                
+                console.log('Advanced Categories Manager: Categories saved to storage');
+                console.log('Advanced Categories Manager: CSV content length:', csvContent.length);
+                console.log('Advanced Categories Manager: Legacy format categories:', legacyFormatCategories.length);
+                
+            } catch (error) {
+                console.error('Advanced Categories Manager: Error saving categories:', error);
+                showSaveIndicator('Error saving changes');
+            }
+        }
+        
+        function convertToHierarchicalStructure(flatCategories) {
+            const tree = {};
+            
+            flatCategories.forEach(category => {
+                const level1 = category.level1;
+                const level2 = category.level2;
+                const level3 = category.level3;
+                
+                if (!level1) return;
+                
+                // Initialize Level 1
+                if (!tree[level1]) {
+                    tree[level1] = {
+                        english: level1,
+                        arabic: category.level1Ar || '',
+                        level1Keywords: category.level1Keywords ? category.level1Keywords.split(';').map(k => k.trim()).filter(k => k) : [],
+                        level2: {}
+                    };
+                }
+                
+                // Initialize Level 2 if exists
+                if (level2 && !tree[level1].level2[level2]) {
+                    tree[level1].level2[level2] = {
+                        english: level2,
+                        arabic: category.level2Ar || '',
+                        level2Keywords: category.level2Keywords ? category.level2Keywords.split(';').map(k => k.trim()).filter(k => k) : [],
+                        level3: {}
+                    };
+                }
+                
+                // Initialize Level 3 if exists
+                if (level3 && level2) {
+                    tree[level1].level2[level2].level3[level3] = {
+                        english: level3,
+                        arabic: category.level3Ar || '',
+                        level3Keywords: category.level3Keywords ? category.level3Keywords.split(';').map(k => k.trim()).filter(k => k) : [],
+                        level1Keywords: category.level1Keywords ? category.level1Keywords.split(';').map(k => k.trim()).filter(k => k) : [],
+                        level2Keywords: category.level2Keywords ? category.level2Keywords.split(';').map(k => k.trim()).filter(k => k) : [],
+                        keywords: []
+                    };
+                    
+                    // Combine all keywords for backward compatibility
+                    const allKeywords = [
+                        ...(category.level1Keywords ? category.level1Keywords.split(';').map(k => k.trim()).filter(k => k) : []),
+                        ...(category.level2Keywords ? category.level2Keywords.split(';').map(k => k.trim()).filter(k => k) : []),
+                        ...(category.level3Keywords ? category.level3Keywords.split(';').map(k => k.trim()).filter(k => k) : [])
+                    ];
+                    tree[level1].level2[level2].level3[level3].keywords = [...new Set(allKeywords)];
+                }
+            });
+            
+            return tree;
+        }
+        
+        function convertToLegacyFormat(flatCategories) {
+            // Convert current CSV-style flat categories to the legacy array format
+            const legacyArray = [];
+            const processedLevel1 = new Set();
+            
+            flatCategories.forEach(category => {
+                const level1 = category.level1;
+                const level2 = category.level2;
+                const level3 = category.level3;
+                
+                if (!level1) return;
+                
+                // Add Level 1 category if not already processed
+                if (!processedLevel1.has(level1)) {
+                    processedLevel1.add(level1);
+                    
+                    // Find all Level 2 categories for this Level 1
+                    const level2Categories = [];
+                    const processedLevel2 = new Set();
+                    
+                    flatCategories.forEach(cat => {
+                        if (cat.level1 === level1 && cat.level2 && !processedLevel2.has(cat.level2)) {
+                            processedLevel2.add(cat.level2);
+                            
+                            // Find all Level 3 categories for this Level 2
+                            const level3Categories = [];
+                            flatCategories.forEach(cat3 => {
+                                if (cat3.level1 === level1 && cat3.level2 === cat.level2 && cat3.level3) {
+                                    level3Categories.push({
+                                        english: cat3.level3,
+                                        arabic: cat3.level3Ar || '',
+                                        level3Keywords: cat3.level3Keywords ? cat3.level3Keywords.split(';').map(k => k.trim()).filter(k => k) : [],
+                                        keywords: cat3.level3Keywords ? cat3.level3Keywords.split(';').map(k => k.trim()).filter(k => k) : []
+                                    });
+                                }
+                            });
+                            
+                            level2Categories.push({
+                                english: cat.level2,
+                                arabic: cat.level2Ar || '',
+                                level2Keywords: cat.level2Keywords ? cat.level2Keywords.split(';').map(k => k.trim()).filter(k => k) : [],
+                                level3Categories: level3Categories
+                            });
+                        }
+                    });
+                    
+                    legacyArray.push({
+                        english: level1,
+                        arabic: category.level1Ar || '',
+                        level1Keywords: category.level1Keywords ? category.level1Keywords.split(';').map(k => k.trim()).filter(k => k) : [],
+                        level2Categories: level2Categories,
+                        active: true
+                    });
+                }
+            });
+            
+            return legacyArray;
+        }
+        
+        function generateCategoriesCSV() {
+            let csvLines = ['Level 1,Level 1 (Arabic),Level 2,Level 2 (Arabic),Level 3,Level 3 (Arabic),Level 1 Keywords & Synonyms,Level 2 Keywords & Synonyms,Level 3 Keywords & Synonyms'];
+            
+            currentCategories.forEach(category => {
+                const line = [
+                    `"${(category.level1 || '').replace(/"/g, '""')}"`,
+                    `"${(category.level1Ar || '').replace(/"/g, '""')}"`,
+                    `"${(category.level2 || '').replace(/"/g, '""')}"`,
+                    `"${(category.level2Ar || '').replace(/"/g, '""')}"`,
+                    `"${(category.level3 || '').replace(/"/g, '""')}"`,
+                    `"${(category.level3Ar || '').replace(/"/g, '""')}"`,
+                    `"${(category.level1Keywords || '').replace(/"/g, '""')}"`,
+                    `"${(category.level2Keywords || '').replace(/"/g, '""')}"`,
+                    `"${(category.level3Keywords || '').replace(/"/g, '""')}"`
+                ].join(',');
+                
+                csvLines.push(line);
+            });
+            
+            return csvLines.join('\n');
+        }
+        
+        function generateUpdatedAdminScript(csvContent) {
+            // This function would generate the updated admin-script.js content
+            // For demonstration, we'll just return the CSV
+            return csvContent;
+        }
+        
+        function searchCategories() {
+            const searchTerm = document.getElementById('categorySearch').value.toLowerCase();
+            const levelFilter = document.getElementById('levelFilter').value;
+            
+            let filtered = allCategories.filter(category => {
+                const matchesSearch = !searchTerm || 
+                    (category.level1 && category.level1.toLowerCase().includes(searchTerm)) ||
+                    (category.level1Ar && category.level1Ar.includes(searchTerm)) ||
+                    (category.level2 && category.level2.toLowerCase().includes(searchTerm)) ||
+                    (category.level2Ar && category.level2Ar.includes(searchTerm)) ||
+                    (category.level3 && category.level3.toLowerCase().includes(searchTerm)) ||
+                    (category.level3Ar && category.level3Ar.includes(searchTerm)) ||
+                    (category.level1Keywords && category.level1Keywords.toLowerCase().includes(searchTerm)) ||
+                    (category.level2Keywords && category.level2Keywords.toLowerCase().includes(searchTerm)) ||
+                    (category.level3Keywords && category.level3Keywords.toLowerCase().includes(searchTerm));
+                
+                // Level filter based on whether it's Level 1, 2, or 3 category
+                let matchesLevel = true;
+                if (levelFilter) {
+                    switch (levelFilter) {
+                        case '1':
+                            matchesLevel = category.level1 && !category.level2;
+                            break;
+                        case '2':
+                            matchesLevel = category.level2 && !category.level3;
+                            break;
+                        case '3':
+                            matchesLevel = category.level3;
+                            break;
+                    }
+                }
+                
+                return matchesSearch && matchesLevel;
+            });
+            
+            currentCategories = filtered;
+            renderCategoriesTable(currentCategories);
+        }
+        
+        function exportCategories() {
+            const csvContent = generateCategoriesCSV();
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                // Add timestamp to filename
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                const filename = `saudi_business_categories_${timestamp}.csv`;
+                
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(url); // Clean up
+            }
+            
+            showSaveIndicator(`Categories exported successfully as ${filename || 'CSV file'}`);
+        }
+        
+        function loadCategoryCounts() {
+            // Get actual company data from localStorage
+            const companies = JSON.parse(localStorage.getItem('logodaleel_companies') || '[]');
+            
+            currentCategories.forEach((category, index) => {
+                const countElement = document.getElementById(`categoryCount_${index}`);
+                if (countElement) {
+                    // Count companies that match this category
+                    let count = 0;
+                    
+                    companies.forEach(company => {
+                        if (company.category) {
+                            // Check if company category matches this category name or keywords
+                            const companyCategory = company.category.toLowerCase();
+                            const categoryName = category.name.toLowerCase();
+                            const categoryNameAr = category.nameAr.toLowerCase();
+                            
+                            if (companyCategory.includes(categoryName) || 
+                                companyCategory.includes(categoryNameAr)) {
+                                count++;
+                            } else if (category.keywords) {
+                                // Check if any keyword matches
+                                const hasMatchingKeyword = category.keywords.some(keyword => 
+                                    companyCategory.includes(keyword.toLowerCase()) ||
+                                    keyword.toLowerCase().includes(companyCategory)
+                                );
+                                if (hasMatchingKeyword) {
+                                    count++;
+                                }
+                            }
+                        }
+                    });
+                    
+                    countElement.textContent = count;
+                }
+            });
+        }
+        
+        function loadStatistics() {
+            // Get real data from localStorage
+            const companies = JSON.parse(localStorage.getItem('logodaleel_companies') || '[]');
+            
+            // Total categories
+            document.getElementById('totalCategories').textContent = currentCategories.length;
+            
+            // Average keywords per category
+            const avgKeywords = currentCategories.length > 0 
+                ? Math.round(currentCategories.reduce((sum, cat) => sum + (cat.keywords ? cat.keywords.length : 0), 0) / currentCategories.length)
+                : 0;
+            document.getElementById('avgKeywords').textContent = avgKeywords;
+            
+            // Companies with categories (companies that have a category assigned)
+            const companiesWithCategories = companies.filter(company => 
+                company.category && company.category.trim() !== '' && !company.deletedDate
+            ).length;
+            document.getElementById('companiesWithCategory').textContent = companiesWithCategories;
+        }
+        
+        function filterCategories() {
+            const searchTerm = document.getElementById('categorySearch').value.toLowerCase();
+            
+            if (!searchTerm.trim()) {
+                // Show all categories if search is empty
+                renderCategoriesTable(currentCategories);
+                return;
+            }
+            
+            const filteredCategories = currentCategories.filter(category => {
+                // Search in English name
+                const englishMatch = category.name.toLowerCase().includes(searchTerm);
+                
+                // Search in Arabic name
+                const arabicMatch = category.nameAr.toLowerCase().includes(searchTerm);
+                
+                // Search in keywords
+                const keywordMatch = category.keywords && category.keywords.some(keyword => 
+                    keyword.toLowerCase().includes(searchTerm)
+                );
+                
+                return englishMatch || arabicMatch || keywordMatch;
+            });
+            
+            renderCategoriesTable(filteredCategories);
+        }
+        
+        function openAddCategoryModal() {
+            editingCategoryIndex = -1;
+            document.getElementById('modalTitle').textContent = 'Add New Category';
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categoryNameAr').value = '';
+            document.getElementById('categoryKeywords').value = '';
+            document.getElementById('categoryModal').style.display = 'block';
+            
+            // Focus the first input
+            setTimeout(() => {
+                document.getElementById('categoryName').focus();
+            }, 100);
+            
+            // Load draft if available
+            loadDraft();
+        }
+        
+        function editCategory(index) {
+            editingCategoryIndex = index;
+            const category = currentCategories[index];
+            document.getElementById('modalTitle').textContent = 'Edit Category';
+            document.getElementById('categoryName').value = category.name;
+            document.getElementById('categoryNameAr').value = category.nameAr;
+            document.getElementById('categoryKeywords').value = category.keywords.join('; ');
+            document.getElementById('categoryModal').style.display = 'block';
+        }
+        
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').style.display = 'none';
+        }
+        
+        function saveCategory() {
+            const name = document.getElementById('categoryName').value.trim();
+            const nameAr = document.getElementById('categoryNameAr').value.trim();
+            const keywordsText = document.getElementById('categoryKeywords').value.trim();
+            
+            if (!name || !nameAr || !keywordsText) {
+                showAlert('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            const keywords = keywordsText.split(';').map(k => k.trim()).filter(k => k.length > 0);
+            
+            if (keywords.length === 0) {
+                showAlert('Please provide at least one keyword', 'error');
+                return;
+            }
+            
+            const categoryData = { name, nameAr, keywords };
+            
+            if (editingCategoryIndex >= 0) {
+                // Edit existing category
+                currentCategories[editingCategoryIndex] = categoryData;
+                showAlert('Category updated successfully', 'success');
+            } else {
+                // Add new category
+                currentCategories.push(categoryData);
+                showAlert('Category added successfully', 'success');
+            }
+            
+            // Save to localStorage or send to server
+            saveCategoriesToStorage();
+            
+            // Clear draft after successful save
+            clearDraft();
+            
+            // Refresh display
+            loadCategories();
+            loadStatistics();
+            closeCategoryModal();
+        }
+        
+        function deleteCategory(index) {
+            categoryToDelete = index;
+            const category = currentCategories[index];
+            document.getElementById('deleteCategory').textContent = `${category.name} / ${category.nameAr}`;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            categoryToDelete = null;
+        }
+        
+        function confirmDelete() {
+            if (categoryToDelete !== null) {
+                currentCategories.splice(categoryToDelete, 1);
+                saveCategoriesToStorage();
+                loadCategories();
+                loadStatistics();
+                showAlert('Category deleted successfully', 'success');
+                closeDeleteModal();
+            }
+        }
+        
+        function saveCategoriesToStorage() {
+            // Convert categories back to admin format and save to correct localStorage key
+            const adminFormatCategories = currentCategories.map(cat => ({
+                english: cat.name,
+                arabic: cat.nameAr,
+                keywords: cat.keywords,
+                active: true
+            }));
+            
+            localStorage.setItem('logodaleel_categories', JSON.stringify(adminFormatCategories));
+            
+            // Trigger refresh notification for other tabs/dashboard
+            localStorage.setItem('logodaleel_refresh_trigger', Date.now().toString());
+        }
+        
+        function exportCategories() {
+            const dataStr = JSON.stringify(currentCategories, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'logodaleel_categories.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            showAlert('Categories exported successfully', 'success');
+        }
+        
+        function importCategories() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv,.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const fileContent = e.target.result;
+                            let importedCategories;
+                            
+                            if (file.name.toLowerCase().endsWith('.csv')) {
+                                // Parse CSV file
+                                importedCategories = parseCsvToCategories(fileContent);
+                                console.log('Advanced Categories Manager: Imported', importedCategories.length, 'categories from CSV');
+                            } else if (file.name.toLowerCase().endsWith('.json')) {
+                                // Parse JSON file
+                                importedCategories = JSON.parse(fileContent);
+                                console.log('Advanced Categories Manager: Imported', importedCategories.length, 'categories from JSON');
+                            } else {
+                                showAlert('Please select a CSV or JSON file', 'error');
+                                return;
+                            }
+                            
+                            if (Array.isArray(importedCategories) && importedCategories.length > 0) {
+                                // Backup current data before import
+                                localStorage.setItem('categoriesBackupBeforeImport', JSON.stringify(currentCategories));
+                                
+                                // Update categories
+                                currentCategories = importedCategories;
+                                allCategories = importedCategories;
+                                
+                                // Save and refresh
+                                saveCategoriesToStorage();
+                                renderCategoriesTable(currentCategories);
+                                loadStatistics();
+                                
+                                // Trigger refresh for the main admin dashboard
+                                autoSaveCategories();
+                                
+                                showSaveIndicator(`Successfully imported ${importedCategories.length} categories from ${file.name}`);
+                            } else {
+                                showAlert('Invalid file format or empty file', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Advanced Categories Manager: Import error:', error);
+                            showAlert('Error parsing file: ' + error.message, 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+        
+        
+        function initializeAllCategories() {
+            if (confirm('This will load all 40 Level 1 categories with 300+ Level 2 subcategories from the Saudi Business Classification Standards. This will replace any existing custom categories. Continue?')) {
+                // Force initialization of default categories
+                const comprehensiveCategories = initializeDefaultCategories();
+                currentCategories = comprehensiveCategories;
+                
+                // Refresh display
+                renderCategoriesTable(currentCategories);
+                loadStatistics();
+                showAlert(`Successfully loaded ${comprehensiveCategories.length} comprehensive Saudi business categories with all Level 1 and Level 2 classifications!`, 'success');
+                
+                // Update statistics display
+                document.getElementById('totalCategories').textContent = comprehensiveCategories.length;
+                document.getElementById('totalSubcategories').textContent = '300+';
+            }
+        }
+        
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const categoryModal = document.getElementById('categoryModal');
+            const deleteModal = document.getElementById('deleteModal');
+            
+            if (event.target === categoryModal) {
+                closeCategoryModal();
+            }
+            if (event.target === deleteModal) {
+                closeDeleteModal();
+            }
+        };
+        
+        // Helper functions for category hierarchy
+        function groupCategoriesByHierarchy(categories) {
+            // This can be used for better organization if needed
+            return categories;
+        }
+        
+        function countLevel2Subcategories(categories, level1) {
+            return categories.filter(cat => cat.level1 === level1 && cat.level2 && !cat.level3).length;
+        }
+        
+        function countLevel3Subcategories(categories, level1, level2) {
+            return categories.filter(cat => cat.level1 === level1 && cat.level2 === level2 && cat.level3).length;
+        }
+        
+        // Add category functions
+        function addLevel1Category() {
+            console.log('Adding new Level 1 category');
+            
+            // Create a new row for the Level 1 category
+            const newCategory = {
+                level1: '',
+                level1Ar: '',
+                level2: '',
+                level2Ar: '',
+                level3: '',
+                level3Ar: '',
+                level1Keywords: '',
+                level2Keywords: '',
+                level3Keywords: ''
+            };
+            
+            // Add to the beginning of the categories array
+            currentCategories.unshift(newCategory);
+            
+            // Re-render the table
+            renderCategoriesTable(currentCategories);
+            
+            // Find the first row after the add button and put it in edit mode
+            const firstDataRow = document.querySelector('tbody tr[data-category-index="0"]');
+            if (firstDataRow) {
+                firstDataRow.classList.add('category-row-adding');
+                const level1Cell = firstDataRow.querySelector('[data-field="level1"]');
+                if (level1Cell) {
+                    setTimeout(() => {
+                        editCell(level1Cell, 'text');
+                    }, 100);
+                }
+            }
+        }
+        
+        function addLevel2Category(parentLevel1, parentIndex) {
+            console.log('Adding new Level 2 category for:', parentLevel1);
+            
+            // Find the parent Level 1 category data
+            const parentCategory = currentCategories[parentIndex];
+            if (!parentCategory) return;
+            
+            // Create a new Level 2 category
+            const newCategory = {
+                level1: parentLevel1,
+                level1Ar: parentCategory.level1Ar || '',
+                level2: '',
+                level2Ar: '',
+                level3: '',
+                level3Ar: '',
+                level1Keywords: parentCategory.level1Keywords || '',
+                level2Keywords: '',
+                level3Keywords: ''
+            };
+            
+            // Insert after the parent category
+            currentCategories.splice(parentIndex + 1, 0, newCategory);
+            
+            // Re-render the table
+            renderCategoriesTable(currentCategories);
+            
+            // Find the newly added row and put Level 2 cell in edit mode
+            const newRowIndex = parentIndex + 1;
+            const newRow = document.querySelector(`tbody tr[data-category-index="${newRowIndex}"]`);
+            if (newRow) {
+                newRow.classList.add('category-row-adding');
+                const level2Cell = newRow.querySelector('[data-field="level2"]');
+                if (level2Cell) {
+                    setTimeout(() => {
+                        editCell(level2Cell, 'text');
+                    }, 100);
+                }
+            }
+        }
+        
+        function addLevel3Category(parentLevel1, parentLevel2, parentIndex) {
+            console.log('Adding new Level 3 category for:', parentLevel1, '->', parentLevel2);
+            
+            // Find the parent Level 2 category data
+            const parentCategory = currentCategories[parentIndex];
+            if (!parentCategory) return;
+            
+            // Create a new Level 3 category
+            const newCategory = {
+                level1: parentLevel1,
+                level1Ar: parentCategory.level1Ar || '',
+                level2: parentLevel2,
+                level2Ar: parentCategory.level2Ar || '',
+                level3: '',
+                level3Ar: '',
+                level1Keywords: parentCategory.level1Keywords || '',
+                level2Keywords: parentCategory.level2Keywords || '',
+                level3Keywords: ''
+            };
+            
+            // Insert after the parent category
+            currentCategories.splice(parentIndex + 1, 0, newCategory);
+            
+            // Re-render the table
+            renderCategoriesTable(currentCategories);
+            
+            // Find the newly added row and put Level 3 cell in edit mode
+            const newRowIndex = parentIndex + 1;
+            const newRow = document.querySelector(`tbody tr[data-category-index="${newRowIndex}"]`);
+            if (newRow) {
+                newRow.classList.add('category-row-adding');
+                const level3Cell = newRow.querySelector('[data-field="level3"]');
+                if (level3Cell) {
+                    setTimeout(() => {
+                        editCell(level3Cell, 'text');
+                    }, 100);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

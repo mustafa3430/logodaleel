@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogoDaleel - Admin Dashboard</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-shield-alt"></i> LogoDaleel Admin Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn-refresh-icon" onclick="refreshCompaniesData()" title="Smart refresh - updates current page with latest data from localStorage">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn-export-icon" onclick="exportDataForPublic()" title="Export data for public website" id="exportDataBtn">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="btn-add-company-icon" onclick="addNewCompany()" id="addCompanyBtn" title="Add new company">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="hamburger-menu" onclick="toggleSidePanel()" title="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Side Panel -->
+        <div class="side-panel" id="sidePanel">
+            <div class="side-panel-content">
+                <div class="side-panel-header">
+                    <h3>Menu</h3>
+                    <div class="side-panel-header-actions">
+                        <a href="index.html" class="btn-view-site-icon" onclick="clearSavedPage()" title="View Website">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        <button class="close-side-panel" onclick="closeSidePanel()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <nav class="side-panel-nav">
+                    <a href="#" onclick="navigateToHome()" class="nav-item">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" onclick="navigateToReports()" class="nav-item">
+                        <i class="fas fa-flag"></i>
+                        <span>Reports</span>
+                    </a>
+                    <a href="#" onclick="navigateToCategories()" class="nav-item">
+                        <i class="fas fa-tags"></i>
+                        <span>Categories</span>
+                    </a>
+                    <a href="#" onclick="navigateToBlacklist()" class="nav-item">
+                        <i class="fas fa-ban"></i>
+                        <span>Blacklist</span>
+                    </a>
+                    <a href="#" onclick="navigateToArchive()" class="nav-item">
+                        <i class="fas fa-archive"></i>
+                        <span>Archive</span>
+                    </a>
+                    <a href="#" onclick="navigateToSiteSettings()" class="nav-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Site Settings</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Side Panel Overlay -->
+        <div class="side-panel-overlay" id="sidePanelOverlay" onclick="closeSidePanel()"></div>
+
+        <!-- Main Content Pages -->
+        <div class="page-container">
+            <!-- Dashboard Page -->
+            <div class="page" id="dashboardPage">
+                <!-- Search and Filters -->
+                <div class="search-section">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Search companies by name, category, or location..." 
+                               onkeyup="searchCompanies()" />
+                        <button class="clear-search" onclick="clearSearch()" title="Clear search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="filters">
+                        <select id="categoryFilter" onchange="filterCompanies()">
+                            <option value="">All Categories</option>
+                        </select>
+                        <select id="locationFilter" onchange="filterCompanies()">
+                            <option value="">All Locations</option>
+                        </select>
+                        <span class="results-count" id="resultsCount">0 companies</span>
+                    </div>
+                </div>
+
+                <!-- Company Status Filters -->
+                <div class="company-status-filters">
+                    <button class="status-filter-btn active" data-filter="all" onclick="setCompanyStatusFilter('all')">
+                        <i class="fas fa-list"></i> All Companies
+                    </button>
+                    <button class="status-filter-btn" data-filter="active" onclick="setCompanyStatusFilter('active')">
+                        <i class="fas fa-check-circle"></i> Active
+                    </button>
+                    <button class="status-filter-btn" data-filter="deleted" onclick="setCompanyStatusFilter('deleted')">
+                        <i class="fas fa-trash-alt"></i> Deleted
+                    </button>
+                    <button class="status-filter-btn" data-filter="blacklisted" onclick="setCompanyStatusFilter('blacklisted')">
+                        <i class="fas fa-ban"></i> Blacklisted
+                    </button>
+                    <button class="status-filter-btn" data-filter="duplicates" onclick="setCompanyStatusFilter('duplicates')">
+                        <i class="fas fa-clone"></i> Duplicates
+                    </button>
+                </div>
+
+                <!-- Companies Table -->
+                <div class="table-container">
+                    <div class="table-wrapper">
+                        <table class="companies-table" id="companiesTable">
+                        <thead>
+                            <tr>
+                                <th class="actions-col">Actions</th>
+                                <th class="logo-col">Logo</th>
+                                <th class="name-col">Company Name</th>
+                                <th class="description-col" data-field="description">Description</th>
+                                <th class="category-col">Business Category</th>
+                                <th class="phone-col">Phone</th>
+                                <th class="website-col">Website</th>
+                                <th class="branches-col">Branches</th>
+                                <th class="social-col">Social Media (Optional)</th>
+                                <th class="news-col" data-field="news">News/Updates</th>
+                                <th class="edited-col">Last Edited</th>
+                            </tr>
+                        </thead>
+                        <tbody id="companiesTableBody">
+                            <!-- Companies will be loaded here -->
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div class="loading" id="loadingIndicator">
+                    <i class="fas fa-spinner fa-spin"></i> Loading companies...
+                </div>
+
+                <!-- No results message -->
+                <div class="no-results" id="noResults" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <h3>No companies found</h3>
+                    <p>Try adjusting your search criteria or add a new company.</p>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div class="page" id="reportsPage">
+                <div class="page-header">
+                    <h2><i class="fas fa-flag"></i> Company Reports Management</h2>
+                    <p>Manage and review reported companies</p>
+                </div>
+                
+                <div class="reports-stats">
+                    <div class="stat-card pending">
+                        <div class="stat-number" id="pendingCount">0</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-card reviewed">
+                        <div class="stat-number" id="reviewedCount">0</div>
+                        <div class="stat-label">Reviewed</div>
+                    </div>
+                    <div class="stat-card resolved">
+                        <div class="stat-number" id="resolvedCount">0</div>
+                        <div class="stat-label">Resolved</div>
+                    </div>
+                    <div class="stat-card dismissed">
+                        <div class="stat-number" id="dismissedCount">0</div>
+                        <div class="stat-label">Dismissed</div>
+                    </div>
+                </div>
+                
+                <div class="reports-filters">
+                    <select id="reportsStatusFilter" onchange="filterReports()">
+                        <option value="">All Reports</option>
+                        <option value="pending">Pending</option>
+                        <option value="reviewed">Reviewed</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="dismissed">Dismissed</option>
+                    </select>
+                    <select id="reportsReasonFilter" onchange="filterReports()">
+                        <option value="">All Reasons</option>
+                        <option value="inappropriate-content">Inappropriate Content</option>
+                        <option value="false-information">False Information</option>
+                        <option value="spam">Spam</option>
+                        <option value="copyright">Copyright</option>
+                        <option value="not-business">Not a Business</option>
+                        <option value="inappropriate-images">Inappropriate Images</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <input type="text" id="reportsSearch" placeholder="Search by company name..." onkeyup="filterReports()">
+                </div>
+                
+                <div class="reports-list" id="reportsList">
+                    <!-- Reports will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Blacklist Page -->
+            <div class="page" id="blacklistPage">
+                <div class="page-header">
+                    <h2><i class="fas fa-ban"></i> Phone Number Blacklist Management</h2>
+                    <p>Manage blacklisted phone numbers to prevent spam registrations</p>
+                </div>
+
+                <div class="blacklist-section">
+                    <h3>Add Phone Number to Blacklist</h3>
+                    <div class="add-blacklist-form">
+                        <div class="form-group">
+                            <label for="blacklistPhone">Phone Number</label>
+                            <input type="tel" id="blacklistPhone" placeholder="+966-50-123-4567" 
+                                   pattern="\+966-[0-9]{2}-[0-9]{3}-[0-9]{4}">
+                            <small>Format: +966-XX-XXX-XXXX</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="blacklistReason">Reason (Optional)</label>
+                            <textarea id="blacklistReason" placeholder="Reason for blacklisting..." rows="3"></textarea>
+                        </div>
+                        <button onclick="addToBlacklist()" class="btn-add-blacklist">
+                            <i class="fas fa-ban"></i> Add to Blacklist
+                        </button>
+                    </div>
+                </div>
+
+                <div class="blacklist-section">
+                    <h3>Current Blacklisted Numbers</h3>
+                    <div class="blacklist-search">
+                        <input type="text" id="blacklistSearch" placeholder="Search blacklisted numbers..." 
+                               oninput="filterBlacklistedNumbers()">
+                    </div>
+                    <div class="blacklisted-numbers" id="blacklistedNumbers">
+                        <!-- Blacklisted numbers will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Archive Page -->
+            <div class="page" id="archivePage">
+                <div class="page-header">
+                    <h2><i class="fas fa-archive"></i> Archived Companies</h2>
+                    <p>View archived companies (read-only)</p>
+                </div>
+
+                <div class="archive-content" id="archiveContent">
+                    <!-- Archive content will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Categories Page -->
+            <div class="page" id="categoriesPage">
+                <div class="page-header">
+                    <h2><i class="fas fa-tags"></i> Business Categories Management</h2>
+                    <p>Manage business categories and user suggestions</p>
+                </div>
+
+                <!-- Category Statistics -->
+                <div class="categories-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCategoriesCount">0</div>
+                        <div class="stat-label">Total Categories</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="activeCategoriesCount">0</div>
+                        <div class="stat-label">Active Categories</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="pendingSuggestionsCount">0</div>
+                        <div class="stat-label">Pending Suggestions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="companiesUsingCategoriesCount">0</div>
+                        <div class="stat-label">Categories in Use</div>
+                    </div>
+                </div>
+
+                <!-- Categories Management Section -->
+                <div class="categories-section">
+                    <div class="section-header">
+                        <h3>Manage Categories</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-success" onclick="openDetailedCategoriesManager()">
+                                <i class="fas fa-cog"></i> Advanced Manager
+                            </button>
+                            <button class="btn btn-primary" onclick="showAddCategoryModal()">
+                                <i class="fas fa-plus"></i> Add Category
+                            </button>
+                            <button class="btn btn-secondary" onclick="expandAllCategories()">
+                                <i class="fas fa-expand-alt"></i> Expand All
+                            </button>
+                            <button class="btn btn-secondary" onclick="collapseAllCategories()">
+                                <i class="fas fa-compress-alt"></i> Collapse All
+                            </button>
+                            <button class="btn btn-warning debug-only" onclick="debugResetCategories()" style="margin-left: 10px; display: none;">
+                                <i class="fas fa-sync"></i> Debug Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Categories Filter -->
+                    <div class="categories-filters">
+                        <input type="text" id="categoriesSearchInput" placeholder="Search categories..." onkeyup="filterCategoriesHierarchy()">
+                        <select id="categoryStatusFilter" onchange="filterCategoriesHierarchy()">
+                            <option value="">All Categories</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        <select id="categoryLanguageFilter" onchange="filterCategoriesHierarchy()">
+                            <option value="">All Languages</option>
+                            <option value="english">English Names</option>
+                            <option value="arabic">Arabic Names</option>
+                        </select>
+                    </div>
+
+                    <!-- Categories Hierarchy -->
+                    <div class="categories-hierarchy" id="categoriesHierarchy">
+                        <!-- Categories will be loaded here in hierarchical format -->
+                    </div>
+                </div>
+
+                <!-- User Suggestions Section -->
+                <div class="categories-section">
+                    <div class="section-header">
+                        <h3>User Suggestions</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" onclick="clearAllSuggestions()">
+                                <i class="fas fa-trash"></i> Clear All
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Suggestions Filter -->
+                    <div class="suggestions-filters">
+                        <input type="text" id="suggestionsSearchInput" placeholder="Search suggestions..." onkeyup="filterSuggestionsTable()">
+                        <select id="suggestionStatusFilter" onchange="filterSuggestionsTable()">
+                            <option value="">All Suggestions</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <!-- Suggestions Table -->
+                    <div class="table-container">
+                        <div class="table-wrapper">
+                            <table class="suggestions-table" id="suggestionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Suggested Category</th>
+                                        <th>Language</th>
+                                        <th>Date Suggested</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="suggestionsTableBody">
+                                    <!-- Suggestions will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Site Settings Page -->
+            <div class="page" id="siteSettingsPage">
+                <div class="page-header">
+                    <h2><i class="fas fa-cog"></i> Site Settings</h2>
+                    <p>Configure your LogoDaleel site settings and legal documents</p>
+                </div>
+
+                <form id="siteSettingsForm" class="settings-form">
+                    <div class="settings-section">
+                        <h3>Company Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="tradingName">Trading Name</label>
+                            <input type="text" id="tradingName" name="tradingName" placeholder="LogoDaleel.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="registrationNumber">Registration Number</label>
+                            <input type="text" id="registrationNumber" name="registrationNumber" placeholder="Enter registration number">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactEmail">Contact Email</label>
+                            <input type="email" id="contactEmail" name="contactEmail" placeholder="contact@logodaleel.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="saudiBusinessLogo">Saudi Business Center Logo</label>
+                            <input type="file" id="saudiBusinessLogo" name="saudiBusinessLogo" accept="image/*">
+                            <div class="logo-preview" id="saudiLogoPreview" style="display: none;">
+                                <img id="saudiLogoPreviewImg" src="" alt="Saudi Business Logo Preview" style="max-width: 150px; margin-top: 10px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Legal Documents</h3>
+                        
+                        <div class="form-group">
+                            <label for="termsAndConditions">Terms and Conditions</label>
+                            <div class="editor-toolbar">
+                                <button type="button" onclick="formatText('bold')" title="Bold"><i class="fas fa-bold"></i></button>
+                                <button type="button" onclick="formatText('italic')" title="Italic"><i class="fas fa-italic"></i></button>
+                                <button type="button" onclick="formatText('underline')" title="Underline"><i class="fas fa-underline"></i></button>
+                                <button type="button" onclick="insertHeading()" title="Insert Heading"><i class="fas fa-heading"></i></button>
+                                <button type="button" onclick="insertList()" title="Insert List"><i class="fas fa-list"></i></button>
+                            </div>
+                            <div id="termsEditor" class="content-editor" contenteditable="true" placeholder="Enter terms and conditions..."></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="privacyPolicy">Privacy Policy</label>
+                            <div class="editor-toolbar">
+                                <button type="button" onclick="formatText('bold')" title="Bold"><i class="fas fa-bold"></i></button>
+                                <button type="button" onclick="formatText('italic')" title="Italic"><i class="fas fa-italic"></i></button>
+                                <button type="button" onclick="formatText('underline')" title="Underline"><i class="fas fa-underline"></i></button>
+                                <button type="button" onclick="insertHeading()" title="Insert Heading"><i class="fas fa-heading"></i></button>
+                                <button type="button" onclick="insertList()" title="Insert List"><i class="fas fa-list"></i></button>
+                            </div>
+                            <div id="privacyEditor" class="content-editor" contenteditable="true" placeholder="Enter privacy policy..."></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-save" onclick="saveSiteSettings()">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    <!-- Edit Modal (for complex edits) -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Edit Company</h2>
+                <button class="close-modal" onclick="closeEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Edit form will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Category Modal -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="categoryModalTitle">Add Category</h2>
+                <button class="close-modal" onclick="closeCategoryModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm" onsubmit="saveCategoryForm(event)">
+                    <div class="form-group">
+                        <label for="categoryEnglish">English Name <span class="required">*</span></label>
+                        <input type="text" id="categoryEnglish" name="english" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryArabic">Arabic Name <span class="required">*</span></label>
+                        <input type="text" id="categoryArabic" name="arabic" required dir="rtl">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryKeywords">Keywords (comma-separated)</label>
+                        <textarea id="categoryKeywords" name="keywords" rows="3" placeholder="technology, tech, IT, software, development"></textarea>
+                        <small>Add keywords that help users find this category when searching</small>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="categoryActive" name="active" checked>
+                            Active Category
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Category
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Categories Manager Modal -->
+    <div id="advancedManagerModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container advanced-manager-modal">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-cog"></i>
+                    Advanced Categories Manager
+                </h2>
+                <button class="modal-close-btn" onclick="closeAdvancedManagerModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="advancedManagerContent">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <p>Loading Advanced Categories Manager...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="saudi_data.js"></script>
+    <script src="admin-script.js"></script>
+</body>
+</html>
