@@ -1,4 +1,6 @@
-﻿// Admin Dashboard JavaScript
+﻿// Admin Dashboard JavaScript - Version 1.1
+console.log('🚀 Admin script loading... Version 1.1');
+
 let allCompanies = [];
 let filteredCompanies = [];
 let editingRowId = null;
