@@ -1,6 +1,11 @@
 # LogoDaleel - Saudi Business Directory
 
+[![Deploy to GitHub Pages](https://github.com/mustafa3430/logodaleel/actions/workflows/deploy.yml/badge.svg)](https://github.com/mustafa3430/logodaleel/actions/workflows/deploy.yml)
+
 A comprehensive business directory platform for Saudi Arabia with company listings, advanced search, and admin management capabilities.
+
+## 🌐 Live Demo
+**🔗 [Visit LogoDaleel Live Site](https://mustafa3430.github.io/logodaleel/)**
 
 ## 🚀 Features
 
