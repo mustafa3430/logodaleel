@@ -112,7 +112,6 @@ function showPage(pageId, caller = 'navigation') {
         const endTime = performance.now();
         const loadTime = endTime - startTime;
         console.log(`✅ Page ${pageId} loaded in ${loadTime.toFixed(2)}ms`);
-        }, 50); // Small delay for smooth transition
         
         return true;
     } else {
