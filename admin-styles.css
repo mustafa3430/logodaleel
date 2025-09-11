@@ -486,6 +486,7 @@ body {
     display: grid;
     grid-template-rows: auto auto 1fr;
     overflow: hidden; /* Dashboard handles its own scrolling via table */
+    height: 100%;
 }
 
 /* Other pages use flex layout for natural scrolling */
@@ -864,14 +865,17 @@ body {
     grid-column: 1;
     grid-row: 3;
     min-height: 0;
+    max-height: calc(100vh - 200px); /* Constrain height to force scrolling */
+    display: flex;
+    flex-direction: column;
 }
 
 /* Table wrapper for scrolling */
 .table-wrapper {
     overflow-x: auto;
     overflow-y: auto;
-    max-height: 100%;
-    height: 100%;
+    flex: 1;
+    height: 0; /* Force flex child to respect parent constraints */
     scrollbar-width: thin;
     scrollbar-color: #667eea #f0f0f0;
     width: 100%;
@@ -6456,208 +6460,6 @@ table.companies-table.has-edit-mode td:nth-child(7) {
 
 .advanced-manager-content .categories-table {
     max-height: calc(100vh - 300px);
-}
-
-/* Advanced Manager Interface Styles */
-.advanced-manager-interface {
-    padding: 1rem;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.advanced-controls {
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-.control-group {
-    flex: 1;
-    min-width: 250px;
-}
-
-.control-group h3 {
-    margin: 0 0 1rem 0;
-    color: #495057;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 1rem;
-}
-
-.stat-item {
-    text-align: center;
-    padding: 0.5rem;
-    background: white;
-    border-radius: 4px;
-    border: 1px solid #dee2e6;
-}
-
-.stat-number {
-    display: block;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #007bff;
-}
-
-.stat-label {
-    display: block;
-    font-size: 0.8rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
-}
-
-.advanced-buttons {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.advanced-buttons .btn {
-    flex: 1;
-    min-width: 120px;
-    font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
-}
-
-.advanced-search {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.advanced-search input[type="text"] {
-    padding: 0.5rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-.advanced-search label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    color: #495057;
-}
-
-.advanced-categories-table {
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.table-controls {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-}
-
-.advanced-categories-table .table-container {
-    flex: 1;
-    overflow: auto;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-}
-
-.advanced-categories-table table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
-
-.advanced-categories-table th,
-.advanced-categories-table td {
-    padding: 0.5rem;
-    border-bottom: 1px solid #dee2e6;
-    vertical-align: top;
-}
-
-.advanced-categories-table th {
-    background: #f8f9fa;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.advanced-categories-table .inactive-category {
-    background-color: #fff3cd;
-    opacity: 0.7;
-}
-
-.keywords-preview {
-    display: block;
-    color: #6c757d;
-    font-style: italic;
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.status-badge.active {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.status-badge.inactive {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.usage-count {
-    font-weight: 600;
-    color: #007bff;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 0.25rem;
-}
-
-.action-buttons .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
-}
-
-.error-content {
-    padding: 2rem;
-    text-align: center;
-}
-
-.error-content i {
-    font-size: 3rem;
-    color: #dc3545;
-    margin-bottom: 1rem;
-}
-
-.error-content h3 {
-    color: #dc3545;
-    margin-bottom: 1rem;
 }
 
 /* Advanced CSV Manager Styles */
