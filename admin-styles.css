@@ -488,7 +488,8 @@ body {
     grid-template-rows: auto auto 1fr;
     overflow: hidden; /* Dashboard handles its own scrolling via table */
     height: 100%;
-    padding-bottom: 20px; /* Add bottom padding to the entire dashboard */
+    padding-bottom: 40px; /* Increased dashboard padding */
+    background: linear-gradient(to bottom, transparent calc(100% - 40px), #ff0000 calc(100% - 40px)); /* Temporary red indicator at bottom */
 }
 
 /* Other pages use flex layout for natural scrolling */
@@ -862,12 +863,12 @@ body {
     border-radius: 0;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     width: 100%;
-    margin: 0 0 20px 0; /* Add bottom margin for spacing */
+    margin: 0 0 40px 0; /* Increased bottom margin to 40px */
     overflow: hidden;
     grid-column: 1;
     grid-row: 3;
     min-height: 0;
-    max-height: calc(100vh - 240px); /* Increased from 220px to account for dashboard padding */
+    max-height: calc(100vh - 280px); /* Reduced height significantly to force spacing */
     display: flex;
     flex-direction: column;
 }
