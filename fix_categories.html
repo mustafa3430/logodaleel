@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Arabic Categories</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Fixing Arabic Categories</h1>
+    <p>This will clear corrupted categories and reload from CSV...</p>
+    
+    <script>
+        // Clear corrupted categories from localStorage
+        localStorage.removeItem('logodaleel_categories');
+        console.log('✅ Cleared corrupted categories from localStorage');
+        
+        // Redirect to admin dashboard which will reload categories from CSV
+        window.location.href = 'admin.html';
+    </script>
+</body>
+</html>

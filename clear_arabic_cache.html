@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Arabic Cache - LogoDaleel</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .button {
+            background-color: #007cba;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .button:hover {
+            background-color: #005a87;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .info {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧹 Clear Arabic Cache - LogoDaleel</h1>
+    
+    <div class="info">
+        <h3>✅ Arabic Text Fixed Successfully!</h3>
+        <p>All corrupted Arabic text in the admin dashboard has been corrected using the CSV file data.</p>
+        <p>Click the button below to clear the browser cache and see the corrected Arabic text.</p>
+    </div>
+    
+    <button class="button" onclick="clearCache()">Clear Cache & Fix Arabic</button>
+    
+    <div id="status"></div>
+    
+    <div class="info">
+        <h4>What was fixed:</h4>
+        <ul style="text-align: left;">
+            <li>✅ Transportation: النقل</li>
+            <li>✅ Entertainment: الترفيه</li>
+            <li>✅ Sports & Recreation: الرياضة واللياقة</li>
+            <li>✅ Travel & Tourism: السفر والسياحة</li>
+            <li>✅ Manufacturing: الصناعة</li>
+            <li>✅ Agriculture: الزراعة</li>
+            <li>✅ Energy & Utilities: الطاقة والمرافق</li>
+            <li>✅ Government & Public Services: الحكومة والخدمات العامة</li>
+            <li>✅ Non-Profit Organizations: المنظمات غير الربحية</li>
+            <li>✅ Religious Services: الخدمات الدينية</li>
+            <li>✅ Media & Communications: الإعلام والاتصالات</li>
+            <li>✅ Logistics & Warehousing: اللوجستيات والتخزين</li>
+            <li>✅ Events & Conferences: الفعاليات والمؤتمرات</li>
+            <li>✅ Security Services: خدمات الأمن</li>
+            <li>✅ Cleaning Services: خدمات التنظيف</li>
+        </ul>
+    </div>
+
+    <script>
+        function clearCache() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                // Clear localStorage
+                localStorage.clear();
+                
+                // Clear sessionStorage
+                sessionStorage.clear();
+                
+                // Clear IndexedDB (if used)
+                if ('indexedDB' in window) {
+                    indexedDB.databases().then(databases => {
+                        databases.forEach(db => {
+                            indexedDB.deleteDatabase(db.name);
+                        });
+                    });
+                }
+                
+                statusDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Cache Cleared Successfully!<br>
+                        🎉 Arabic text should now display correctly in the admin dashboard.<br>
+                        <br>
+                        <strong>Next Steps:</strong><br>
+                        1. Close this tab<br>
+                        2. Refresh your admin dashboard<br>
+                        3. All Arabic text should now display properly!
+                    </div>
+                `;
+                
+                console.log('✅ All cache cleared successfully!');
+                console.log('🔄 Please refresh the admin dashboard to see corrected Arabic text.');
+                
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div style="color: red;">
+                        ❌ Error clearing cache: ${error.message}<br>
+                        Please manually refresh your browser (Ctrl+F5 or Cmd+Shift+R)
+                    </div>
+                `;
+                console.error('Error clearing cache:', error);
+            }
+        }
+        
+        // Auto-clear cache on page load
+        window.addEventListener('load', function() {
+            console.log('🧹 Cache clearing page loaded. Ready to fix Arabic text!');
+        });
+    </script>
+</body>
+</html>

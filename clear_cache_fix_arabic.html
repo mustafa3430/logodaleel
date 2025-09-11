@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Cache and Fix Arabic</title>
+</head>
+<body>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h1>🔧 Fixing Arabic Text Display</h1>
+        <p>Clearing corrupted data and reloading with correct Arabic text...</p>
+        <div id="status">Processing...</div>
+    </div>
+
+    <script>
+        document.getElementById('status').innerHTML = 'Clearing localStorage...';
+        
+        // Clear all localStorage data
+        localStorage.clear();
+        
+        // Also clear specific keys that might exist
+        const keysToRemove = [
+            'logodaleel_categories',
+            'logodaleel_companies', 
+            'logodaleel_refresh_trigger',
+            'siteSettings'
+        ];
+        
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
+        });
+        
+        document.getElementById('status').innerHTML = 'Cache cleared! Redirecting to admin dashboard...';
+        
+        setTimeout(() => {
+            window.location.href = 'admin.html#categories';
+        }, 2000);
+    </script>
+</body>
+</html>
