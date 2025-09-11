@@ -1,5 +1,16 @@
-﻿// Admin Dashboard JavaScript - Version 1.1
-console.log('🚀 Admin script loading... Version 1.1');
+﻿// Admin Dashboard JavaScript - Version 1.2 (URL Fix)
+console.log('🚀 Admin script loading... Version 1.2 (URL Fix)');
+
+// Add global test function for URL updating
+window.testURL = function(hash) {
+    console.log(`🧪 Testing URL update to: ${hash}`);
+    try {
+        history.replaceState(null, null, hash);
+        console.log(`✅ URL test successful: ${window.location.hash}`);
+    } catch (error) {
+        console.error('❌ URL test failed:', error);
+    }
+};
 
 let allCompanies = [];
 let filteredCompanies = [];
@@ -112,14 +123,22 @@ function showPage(pageId, caller = 'navigation') {
         targetPage.classList.add('active');
         console.log(`📄 Forced display of ${pageId} - display: ${targetPage.style.display}, classList: ${targetPage.className}`);
         
-        // Update URL fragment IMMEDIATELY and ensure it persists
+        // Update URL fragment ALWAYS (unless it's restoration)
         const fragmentName = pageId.replace('Page', '').toLowerCase();
         const expectedHash = '#' + fragmentName;
         
-        // Only update URL if it's different and we're not in restoration mode
-        if (window.location.hash !== expectedHash) {
-            console.log(`🔗 Updating URL fragment from ${window.location.hash} to ${expectedHash}`);
-            history.replaceState(null, null, expectedHash);
+        console.log(`🔗 Current URL hash: "${window.location.hash}", Expected: "${expectedHash}"`);
+        
+        if (caller !== 'fragment-restore' && caller !== 'initial-fragment') {
+            console.log(`🔗 Updating URL fragment to ${expectedHash}`);
+            try {
+                history.replaceState(null, null, expectedHash);
+                console.log(`✅ URL updated successfully to: ${window.location.hash}`);
+            } catch (error) {
+                console.error('❌ Failed to update URL:', error);
+            }
+        } else {
+            console.log(`🔗 Skipping URL update for restoration caller: ${caller}`);
         }
         
         // Save current page to localStorage AFTER URL update
