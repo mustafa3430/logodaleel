@@ -19,7 +19,7 @@ body {
     color: #333;
     line-height: 1.6;
     margin: 0;
-    padding: 0;
+    padding: 0 0 20px 0; /* Add bottom padding to body */
     width: 100%;
     height: 100vh;
     display: grid;
@@ -452,13 +452,14 @@ body {
 /* Page System */
 .page-container {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 20px); /* Reduce height to create bottom space */
     position: relative;
     overflow: hidden;
     grid-column: 1;
     grid-row: 2;
     display: grid;
     grid-template-rows: auto auto 1fr;
+    margin-bottom: 20px; /* Add explicit bottom margin */
 }
 
 .page {
