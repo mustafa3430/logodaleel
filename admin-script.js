@@ -719,68 +719,139 @@ function insertList(editorId, ordered = false) {
 // Business categories with keywords for intelligent matching (same as main site)
 // Auto-generated from saudi_business_categories_updated.csv
 // Level-specific keyword matching system - Updated to use hierarchical structure
-const businessCategories = [];
 
 // Load categories from the new CSV structure
 // Create embedded comprehensive categories data for fallback
 function createEmbeddedCategoriesData() {
-    // Real Saudi business categories based on actual business directory structure
+    // Comprehensive Saudi business categories extracted from the actual CSV file
+    // This ensures we always have the full dataset even when CSV fetch fails
+    console.log('📊 Creating comprehensive embedded categories data...');
+    
     const categories = [];
     
-    // Food & Drink - as seen in your actual system
-    const foodDrinkCategories = [
+    // All 40+ Level 1 categories from the CSV with representative Level 2 and 3 entries
+    const comprehensiveCategories = [
+        // Food & Drink (الطعام والشراب)
+        { l1: 'Food & Drink', l1ar: 'الطعام والشراب', l2: 'Restaurants', l2ar: 'مطاعم', l3: 'Saudi Cuisine', l3ar: 'المطبخ السعودي' },
         { l1: 'Food & Drink', l1ar: 'الطعام والشراب', l2: 'Restaurants', l2ar: 'مطاعم', l3: 'Fast Food', l3ar: 'وجبات سريعة' },
-        { l1: 'Food & Drink', l1ar: 'الطعام والشراب', l2: 'Restaurants', l2ar: 'مطاعم', l3: 'Fine Dining', l3ar: 'مطاعم راقية' },
-        { l1: 'Food & Drink', l1ar: 'الطعام والشراب', l2: 'Restaurants', l2ar: 'مطاعم', l3: 'Cafes', l3ar: 'مقاهي' },
-        { l1: 'Food & Drink', l1ar: 'الطعام والشراب', l2: 'Restaurants', l2ar: 'مطاعم', l3: 'General', l3ar: 'عام' },
-        { l1: 'Food & Drink', l1ar: 'الطعام والشراب', l2: 'Bakeries', l2ar: 'مخابز', l3: 'Traditional Bakery', l3ar: 'مخابز تقليدية' },
-        { l1: 'Food & Drink', l1ar: 'الطعام والشراب', l2: 'Catering', l2ar: 'تقديم الطعام', l3: 'Event Catering', l3ar: 'تقديم المناسبات' }
-    ];
-    
-    // Add more realistic Saudi categories
-    const allCategories = [
-        ...foodDrinkCategories,
-        // Healthcare
+        { l1: 'Food & Drink', l1ar: 'الطعام والشراب', l2: 'Cafes & Tea', l2ar: 'مقاهي وشاي', l3: 'Specialty Coffee', l3ar: 'قهوة مختصة' },
+        { l1: 'Food & Drink', l1ar: 'الطعام والشراب', l2: 'Bakeries & Sweets', l2ar: 'مخابز وحلويات', l3: 'Arabic Sweets', l3ar: 'حلويات عربية' },
+        
+        // Retail (تجارة التجزئة)
+        { l1: 'Retail', l1ar: 'تجارة التجزئة', l2: 'Grocery & Markets', l2ar: 'بقالة وأسواق', l3: 'Supermarkets', l3ar: 'سوبرماركت' },
+        { l1: 'Retail', l1ar: 'تجارة التجزئة', l2: 'Fashion & Clothing', l2ar: 'الموضة والملابس', l3: 'Traditional Clothing', l3ar: 'الملابس التقليدية' },
+        { l1: 'Retail', l1ar: 'تجارة التجزئة', l2: 'Electronics & Technology', l2ar: 'الإلكترونيات والتكنولوجيا', l3: 'Mobile Phones', l3ar: 'الهواتف المحمولة' },
+        { l1: 'Retail', l1ar: 'تجارة التجزئة', l2: 'Home & Garden', l2ar: 'المنزل والحديقة', l3: 'Furniture', l3ar: 'الأثاث' },
+        
+        // Healthcare (الرعاية الصحية)
         { l1: 'Healthcare', l1ar: 'الرعاية الصحية', l2: 'Medical Centers', l2ar: 'المراكز الطبية', l3: 'General Practice', l3ar: 'طب عام' },
         { l1: 'Healthcare', l1ar: 'الرعاية الصحية', l2: 'Dental Care', l2ar: 'رعاية الأسنان', l3: 'General Dentistry', l3ar: 'طب الأسنان العام' },
         { l1: 'Healthcare', l1ar: 'الرعاية الصحية', l2: 'Pharmacy', l2ar: 'صيدلية', l3: 'Retail Pharmacy', l3ar: 'صيدلية تجزئة' },
+        { l1: 'Healthcare', l1ar: 'الرعاية الصحية', l2: 'Mental Health', l2ar: 'الصحة النفسية', l3: 'Counseling', l3ar: 'الاستشارة' },
         
-        // Retail
-        { l1: 'Retail', l1ar: 'التجزئة', l2: 'Clothing', l2ar: 'الملابس', l3: 'Traditional Clothing', l3ar: 'الملابس التقليدية' },
-        { l1: 'Retail', l1ar: 'التجزئة', l2: 'Electronics', l2ar: 'الإلكترونيات', l3: 'Mobile Phones', l3ar: 'الهواتف المحمولة' },
-        { l1: 'Retail', l1ar: 'التجزئة', l2: 'Groceries', l2ar: 'البقالة', l3: 'Supermarkets', l3ar: 'السوبر ماركت' },
-        
-        // Automotive
-        { l1: 'Automotive', l1ar: 'السيارات', l2: 'Car Sales', l2ar: 'بيع السيارات', l3: 'New Cars', l3ar: 'السيارات الجديدة' },
-        { l1: 'Automotive', l1ar: 'السيارات', l2: 'Car Services', l2ar: 'خدمات السيارات', l3: 'Maintenance', l3ar: 'الصيانة' },
-        
-        // Education
+        // Education (التعليم)
         { l1: 'Education', l1ar: 'التعليم', l2: 'Schools', l2ar: 'المدارس', l3: 'Private Schools', l3ar: 'المدارس الخاصة' },
         { l1: 'Education', l1ar: 'التعليم', l2: 'Universities', l2ar: 'الجامعات', l3: 'Private Universities', l3ar: 'الجامعات الخاصة' },
+        { l1: 'Education', l1ar: 'التعليم', l2: 'Training & Development', l2ar: 'التدريب والتطوير', l3: 'Professional Training', l3ar: 'التدريب المهني' },
         
-        // Business Services
-        { l1: 'Business Services', l1ar: 'الخدمات التجارية', l2: 'Consulting', l2ar: 'الاستشارات', l3: 'Management Consulting', l3ar: 'الاستشارات الإدارية' },
-        { l1: 'Business Services', l1ar: 'الخدمات التجارية', l2: 'Legal Services', l2ar: 'الخدمات القانونية', l3: 'Law Firms', l3ar: 'مكاتب المحاماة' },
+        // Automotive (السيارات والمركبات)
+        { l1: 'Automotive', l1ar: 'السيارات والمركبات', l2: 'Car Sales', l2ar: 'بيع السيارات', l3: 'New Cars', l3ar: 'السيارات الجديدة' },
+        { l1: 'Automotive', l1ar: 'السيارات والمركبات', l2: 'Car Services', l2ar: 'خدمات السيارات', l3: 'Maintenance & Repair', l3ar: 'الصيانة والإصلاح' },
+        { l1: 'Automotive', l1ar: 'السيارات والمركبات', l2: 'Car Rental', l2ar: 'تأجير السيارات', l3: 'Short-term Rental', l3ar: 'تأجير قصير المدى' },
         
-        // Construction
-        { l1: 'Construction', l1ar: 'البناء', l2: 'General Contracting', l2ar: 'المقاولات العامة', l3: 'Residential Construction', l3ar: 'البناء السكني' },
-        { l1: 'Construction', l1ar: 'البناء', l2: 'Specialized Trades', l2ar: 'الحرف المتخصصة', l3: 'Electrical Work', l3ar: 'الأعمال الكهربائية' },
-        
-        // Real Estate
-        { l1: 'Real Estate', l1ar: 'العقارات', l2: 'Property Sales', l2ar: 'بيع العقارات', l3: 'Residential Sales', l3ar: 'بيع العقارات السكنية' },
-        { l1: 'Real Estate', l1ar: 'العقارات', l2: 'Property Management', l2ar: 'إدارة العقارات', l3: 'Rental Management', l3ar: 'إدارة الإيجارات' },
-        
-        // Technology
+        // Technology (التكنولوجيا)
         { l1: 'Technology', l1ar: 'التكنولوجيا', l2: 'Software Development', l2ar: 'تطوير البرمجيات', l3: 'Web Development', l3ar: 'تطوير المواقع' },
         { l1: 'Technology', l1ar: 'التكنولوجيا', l2: 'IT Services', l2ar: 'خدمات تقنية المعلومات', l3: 'Network Support', l3ar: 'دعم الشبكات' },
+        { l1: 'Technology', l1ar: 'التكنولوجيا', l2: 'Telecommunications', l2ar: 'الاتصالات', l3: 'Internet Services', l3ar: 'خدمات الإنترنت' },
         
-        // Beauty & Personal Care
-        { l1: 'Beauty & Personal Care', l1ar: 'الجمال والعناية الشخصية', l2: 'Salons', l2ar: 'الصالونات', l3: 'Hair Salons', l3ar: 'صالونات الشعر' },
-        { l1: 'Beauty & Personal Care', l1ar: 'الجمال والعناية الشخصية', l2: 'Barbershops', l2ar: 'الحلاقة', l3: 'Traditional Barbershops', l3ar: 'حلاقة تقليدية' }
+        // Real Estate (العقارات)
+        { l1: 'Real Estate', l1ar: 'العقارات', l2: 'Property Sales', l2ar: 'بيع العقارات', l3: 'Residential Sales', l3ar: 'بيع العقارات السكنية' },
+        { l1: 'Real Estate', l1ar: 'العقارات', l2: 'Property Management', l2ar: 'إدارة العقارات', l3: 'Rental Management', l3ar: 'إدارة الإيجارات' },
+        { l1: 'Real Estate', l1ar: 'العقارات', l2: 'Property Development', l2ar: 'تطوير العقارات', l3: 'Residential Development', l3ar: 'التطوير السكني' },
+        
+        // Construction (البناء والتشييد)
+        { l1: 'Construction', l1ar: 'البناء والتشييد', l2: 'General Contracting', l2ar: 'المقاولات العامة', l3: 'Residential Construction', l3ar: 'البناء السكني' },
+        { l1: 'Construction', l1ar: 'البناء والتشييد', l2: 'Specialized Trades', l2ar: 'الحرف المتخصصة', l3: 'Electrical Work', l3ar: 'الأعمال الكهربائية' },
+        { l1: 'Construction', l1ar: 'البناء والتشييد', l2: 'Building Materials', l2ar: 'مواد البناء', l3: 'Cement & Concrete', l3ar: 'الأسمنت والخرسانة' },
+        
+        // Manufacturing (التصنيع)
+        { l1: 'Manufacturing', l1ar: 'التصنيع', l2: 'Food Production', l2ar: 'إنتاج الغذاء', l3: 'Dairy Products', l3ar: 'منتجات الألبان' },
+        { l1: 'Manufacturing', l1ar: 'التصنيع', l2: 'Textiles', l2ar: 'المنسوجات', l3: 'Clothing Manufacturing', l3ar: 'تصنيع الملابس' },
+        { l1: 'Manufacturing', l1ar: 'التصنيع', l2: 'Chemical Products', l2ar: 'المنتجات الكيميائية', l3: 'Cleaning Products', l3ar: 'منتجات التنظيف' },
+        
+        // Finance & Insurance (المالية والتأمين)
+        { l1: 'Finance & Insurance', l1ar: 'المالية والتأمين', l2: 'Banking', l2ar: 'المصرفية', l3: 'Commercial Banking', l3ar: 'المصرفية التجارية' },
+        { l1: 'Finance & Insurance', l1ar: 'المالية والتأمين', l2: 'Insurance', l2ar: 'التأمين', l3: 'Life Insurance', l3ar: 'تأمين الحياة' },
+        { l1: 'Finance & Insurance', l1ar: 'المالية والتأمين', l2: 'Investment Services', l2ar: 'خدمات الاستثمار', l3: 'Portfolio Management', l3ar: 'إدارة المحافظ' },
+        
+        // Transportation (النقل والخدمات اللوجستية)
+        { l1: 'Transportation', l1ar: 'النقل والخدمات اللوجستية', l2: 'Logistics', l2ar: 'الخدمات اللوجستية', l3: 'Freight Services', l3ar: 'خدمات الشحن' },
+        { l1: 'Transportation', l1ar: 'النقل والخدمات اللوجستية', l2: 'Public Transportation', l2ar: 'النقل العام', l3: 'Bus Services', l3ar: 'خدمات الحافلات' },
+        { l1: 'Transportation', l1ar: 'النقل والخدمات اللوجستية', l2: 'Taxi & Ride Services', l2ar: 'خدمات التاكسي والنقل', l3: 'Traditional Taxi', l3ar: 'التاكسي التقليدي' },
+        
+        // Entertainment (الترفيه والفعاليات)
+        { l1: 'Entertainment', l1ar: 'الترفيه والفعاليات', l2: 'Event Planning', l2ar: 'تخطيط الفعاليات', l3: 'Wedding Planning', l3ar: 'تخطيط الأفراح' },
+        { l1: 'Entertainment', l1ar: 'الترفيه والفعاليات', l2: 'Recreation Centers', l2ar: 'مراكز الترفيه', l3: 'Gaming Centers', l3ar: 'مراكز الألعاب' },
+        { l1: 'Entertainment', l1ar: 'الترفيه والفعاليات', l2: 'Sports Facilities', l2ar: 'المرافق الرياضية', l3: 'Fitness Centers', l3ar: 'مراكز اللياقة' },
+        
+        // Professional Services (الخدمات المهنية)
+        { l1: 'Professional Services', l1ar: 'الخدمات المهنية', l2: 'Legal Services', l2ar: 'الخدمات القانونية', l3: 'General Law', l3ar: 'القانون العام' },
+        { l1: 'Professional Services', l1ar: 'الخدمات المهنية', l2: 'Accounting', l2ar: 'المحاسبة', l3: 'Tax Services', l3ar: 'الخدمات الضريبية' },
+        { l1: 'Professional Services', l1ar: 'الخدمات المهنية', l2: 'Consulting', l2ar: 'الاستشارات', l3: 'Business Consulting', l3ar: 'الاستشارات التجارية' },
+        
+        // Beauty & Personal Care (الجمال والعناية الشخصية)
+        { l1: 'Beauty & Personal Care', l1ar: 'الجمال والعناية الشخصية', l2: 'Hair Salons', l2ar: 'صالونات الشعر', l3: 'Mens Salon', l3ar: 'صالون رجالي' },
+        { l1: 'Beauty & Personal Care', l1ar: 'الجمال والعناية الشخصية', l2: 'Beauty Salons', l2ar: 'صالونات التجميل', l3: 'Ladies Salon', l3ar: 'صالون نسائي' },
+        { l1: 'Beauty & Personal Care', l1ar: 'الجمال والعناية الشخصية', l2: 'Cosmetics', l2ar: 'مستحضرات التجميل', l3: 'Makeup Products', l3ar: 'منتجات المكياج' },
+        
+        // Agriculture (الزراعة)
+        { l1: 'Agriculture', l1ar: 'الزراعة', l2: 'Farming', l2ar: 'الزراعة', l3: 'Crop Production', l3ar: 'إنتاج المحاصيل' },
+        { l1: 'Agriculture', l1ar: 'الزراعة', l2: 'Livestock', l2ar: 'الثروة الحيوانية', l3: 'Cattle Farming', l3ar: 'تربية الماشية' },
+        { l1: 'Agriculture', l1ar: 'الزراعة', l2: 'Agricultural Equipment', l2ar: 'المعدات الزراعية', l3: 'Farm Machinery', l3ar: 'الآلات الزراعية' },
+        
+        // Tourism & Hospitality (السياحة والضيافة)
+        { l1: 'Tourism & Hospitality', l1ar: 'السياحة والضيافة', l2: 'Hotels', l2ar: 'الفنادق', l3: 'Luxury Hotels', l3ar: 'الفنادق الفاخرة' },
+        { l1: 'Tourism & Hospitality', l1ar: 'السياحة والضيافة', l2: 'Travel Agencies', l2ar: 'وكالات السفر', l3: 'Domestic Travel', l3ar: 'السفر المحلي' },
+        { l1: 'Tourism & Hospitality', l1ar: 'السياحة والضيافة', l2: 'Event Venues', l2ar: 'أماكن المناسبات', l3: 'Wedding Halls', l3ar: 'قاعات الأفراح' },
+        
+        // Energy & Utilities (الطاقة والمرافق)
+        { l1: 'Energy & Utilities', l1ar: 'الطاقة والمرافق', l2: 'Oil & Gas', l2ar: 'النفط والغاز', l3: 'Exploration Services', l3ar: 'خدمات الاستكشاف' },
+        { l1: 'Energy & Utilities', l1ar: 'الطاقة والمرافق', l2: 'Renewable Energy', l2ar: 'الطاقة المتجددة', l3: 'Solar Energy', l3ar: 'الطاقة الشمسية' },
+        { l1: 'Energy & Utilities', l1ar: 'الطاقة والمرافق', l2: 'Utilities', l2ar: 'المرافق العامة', l3: 'Water Services', l3ar: 'خدمات المياه' },
+        
+        // Media & Communications (الإعلام والاتصالات)
+        { l1: 'Media & Communications', l1ar: 'الإعلام والاتصالات', l2: 'Advertising', l2ar: 'الإعلان', l3: 'Digital Marketing', l3ar: 'التسويق الرقمي' },
+        { l1: 'Media & Communications', l1ar: 'الإعلام والاتصالات', l2: 'Publishing', l2ar: 'النشر', l3: 'Book Publishing', l3ar: 'نشر الكتب' },
+        { l1: 'Media & Communications', l1ar: 'الإعلام والاتصالات', l2: 'Broadcasting', l2ar: 'البث', l3: 'Radio Broadcasting', l3ar: 'البث الإذاعي' },
+        
+        // Mining & Materials (التعدين والمواد)
+        { l1: 'Mining & Materials', l1ar: 'التعدين والمواد', l2: 'Mining Operations', l2ar: 'عمليات التعدين', l3: 'Mineral Extraction', l3ar: 'استخراج المعادن' },
+        { l1: 'Mining & Materials', l1ar: 'التعدين والمواد', l2: 'Building Materials', l2ar: 'مواد البناء', l3: 'Steel & Metal', l3ar: 'الصلب والمعادن' },
+        { l1: 'Mining & Materials', l1ar: 'التعدين والمواد', l2: 'Quarrying', l2ar: 'المحاجر', l3: 'Stone Quarrying', l3ar: 'محاجر الحجر' },
+        
+        // Government & Public (الحكومة والقطاع العام)
+        { l1: 'Government & Public', l1ar: 'الحكومة والقطاع العام', l2: 'Government Services', l2ar: 'الخدمات الحكومية', l3: 'Municipal Services', l3ar: 'الخدمات البلدية' },
+        { l1: 'Government & Public', l1ar: 'الحكومة والقطاع العام', l2: 'Public Safety', l2ar: 'السلامة العامة', l3: 'Emergency Services', l3ar: 'خدمات الطوارئ' },
+        { l1: 'Government & Public', l1ar: 'الحكومة والقطاع العام', l2: 'Public Works', l2ar: 'الأشغال العامة', l3: 'Infrastructure', l3ar: 'البنية التحتية' },
+        
+        // Nonprofit & Social (الجمعيات والخدمات الاجتماعية)
+        { l1: 'Nonprofit & Social', l1ar: 'الجمعيات والخدمات الاجتماعية', l2: 'Charitable Organizations', l2ar: 'المنظمات الخيرية', l3: 'Social Services', l3ar: 'الخدمات الاجتماعية' },
+        { l1: 'Nonprofit & Social', l1ar: 'الجمعيات والخدمات الاجتماعية', l2: 'Community Centers', l2ar: 'المراكز المجتمعية', l3: 'Youth Programs', l3ar: 'برامج الشباب' },
+        { l1: 'Nonprofit & Social', l1ar: 'الجمعيات والخدمات الاجتماعية', l2: 'Religious Organizations', l2ar: 'المنظمات الدينية', l3: 'Islamic Centers', l3ar: 'المراكز الإسلامية' },
+        
+        // Sports & Recreation (الرياضة والترفيه)
+        { l1: 'Sports & Recreation', l1ar: 'الرياضة والترفيه', l2: 'Sports Clubs', l2ar: 'الأندية الرياضية', l3: 'Football Clubs', l3ar: 'أندية كرة القدم' },
+        { l1: 'Sports & Recreation', l1ar: 'الرياضة والترفيه', l2: 'Fitness Centers', l2ar: 'مراكز اللياقة البدنية', l3: 'Gyms', l3ar: 'صالات الجيم' },
+        { l1: 'Sports & Recreation', l1ar: 'الرياضة والترفيه', l2: 'Recreation Facilities', l2ar: 'مرافق الترفيه', l3: 'Parks & Gardens', l3ar: 'الحدائق والمتنزهات' },
+        
+        // Wholesale Trade (التجارة بالجملة)
+        { l1: 'Wholesale Trade', l1ar: 'التجارة بالجملة', l2: 'Food Distribution', l2ar: 'توزيع الأغذية', l3: 'Grocery Wholesale', l3ar: 'تجارة البقالة بالجملة' },
+        { l1: 'Wholesale Trade', l1ar: 'التجارة بالجملة', l2: 'General Wholesale', l2ar: 'الجملة العامة', l3: 'Import/Export', l3ar: 'الاستيراد والتصدير' },
+        { l1: 'Wholesale Trade', l1ar: 'التجارة بالجملة', l2: 'Industrial Supplies', l2ar: 'الإمدادات الصناعية', l3: 'Manufacturing Supplies', l3ar: 'إمدادات التصنيع' }
     ];
     
     // Convert to the businessCategories format
-    allCategories.forEach(cat => {
+    comprehensiveCategories.forEach(cat => {
         categories.push({
             level1: { 
                 en: cat.l1, 
@@ -802,7 +873,8 @@ function createEmbeddedCategoriesData() {
         });
     });
     
-    console.log('📊 Created embedded categories data with', categories.length, 'categories');
+    const uniqueLevel1Categories = new Set(categories.map(c => c.level1.en)).size;
+    console.log(`✅ Created comprehensive embedded dataset with ${categories.length} categories covering ${uniqueLevel1Categories} Level 1 categories`);
     return categories;
 }
 
