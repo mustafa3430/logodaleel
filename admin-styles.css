@@ -488,7 +488,7 @@ body {
     grid-template-rows: auto auto 1fr;
     height: 100%;
     overflow: hidden;
-    padding-bottom: 40px; /* Simple bottom padding for spacing */
+    padding-bottom: 20px; /* Reduced padding to give more space to table */
     box-sizing: border-box; /* Include padding in height calculations */
 }
 
@@ -868,7 +868,7 @@ body {
     grid-column: 1;
     grid-row: 3;
     min-height: 0; /* Critical for grid child to shrink */
-    max-height: calc(100vh - 220px); /* Add height constraint to force scrolling */
+    max-height: calc(100vh - 180px); /* Increase available height to show more companies */
     display: flex;
     flex-direction: column;
 }
