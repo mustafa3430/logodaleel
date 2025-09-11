@@ -7,6 +7,7 @@ let editingRowId = null;
 let saudiLocationData = []; // Will be loaded from saudi_data.js
 let currentStatusFilter = 'all'; // Track current status filter: all, active, deleted, blacklisted
 let pageRestorationCompleted = false; // Flag to track if restoration has completed
+let restorationInProgress = false; // Flag to prevent multiple restoration attempts
 
 // Side Panel Functions
 function toggleSidePanel() {
@@ -165,6 +166,11 @@ function saveCurrentPage(pageId) {
 // Restore the last visited page after browser refresh
 // Restore page from URL fragment (for bookmarking support)
 function restorePageFromFragment() {
+    if (restorationInProgress) {
+        console.log('🔄 Restoration already in progress, skipping...');
+        return false;
+    }
+    
     try {
         const fragment = window.location.hash.substring(1); // Remove # symbol
         console.log(`🔗 Attempting to restore from URL fragment: "${fragment}"`);
@@ -173,6 +179,8 @@ function restorePageFromFragment() {
             console.log('🔗 No URL fragment found');
             return false;
         }
+        
+        restorationInProgress = true;
         
         // Map fragment names to page IDs
         const fragmentToPageMap = {
@@ -211,6 +219,7 @@ function restorePageFromFragment() {
             loadPageSpecificData(pageId);
             
             console.log(`✅ Successfully restored page from fragment: ${fragment} -> ${pageId}`);
+            restorationInProgress = false;
             return true;
         } else {
             console.log(`❌ Page element not found for pageId: "${pageId}"`);
@@ -218,6 +227,7 @@ function restorePageFromFragment() {
     } catch (error) {
         console.warn('⚠️ Could not restore page from fragment:', error);
     }
+    restorationInProgress = false;
     return false;
 }
 
@@ -923,11 +933,11 @@ document.addEventListener('DOMContentLoaded', function() {
             updateActiveNavItem('Dashboard');
         }
         
-        // Mark restoration as completed
+        // Mark restoration as completed IMMEDIATELY
         pageRestorationCompleted = true;
-        console.log('✅ Page restoration completed');
+        console.log('✅ Page restoration completed - navigation now enabled');
         
-    }, 150); // Increased delay for better stability
+    }, 100); // Reduced delay but mark completion immediately
     
     // Load business categories from CSV first
     loadBusinessCategories().then(() => {
@@ -1030,11 +1040,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Listen for browser back/forward navigation
     window.addEventListener('popstate', function(event) {
-        // Handle browser back/forward with URL fragments
-        const pageRestored = restorePageFromFragment();
-        if (!pageRestored) {
-            showPage('dashboardPage');
-            updateActiveNavItem('Dashboard');
+        console.log('🔙 Popstate event triggered - browser back/forward navigation');
+        // Only handle browser back/forward with URL fragments - don't interfere with normal navigation
+        if (pageRestorationCompleted && !restorationInProgress) {
+            const pageRestored = restorePageFromFragment();
+            if (!pageRestored) {
+                showPage('dashboardPage', 'popstate-fallback');
+                updateActiveNavItem('Dashboard');
+            }
+        } else {
+            console.log('🔙 Skipping popstate restoration - page restoration not completed yet');
         }
     });
     
