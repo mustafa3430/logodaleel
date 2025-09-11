@@ -486,9 +486,10 @@ body {
 #dashboardPage {
     display: grid;
     grid-template-rows: auto auto 1fr;
-    overflow: hidden; /* Dashboard handles its own scrolling via table */
-    height: calc(100% - 40px); /* Reduce height to create bottom space */
-    margin-bottom: 40px; /* Add visible bottom margin */
+    height: 100%;
+    overflow: hidden;
+    padding-bottom: 40px; /* Simple bottom padding for spacing */
+    box-sizing: border-box; /* Include padding in height calculations */
 }
 
 /* Other pages use flex layout for natural scrolling */
@@ -866,8 +867,8 @@ body {
     overflow: hidden;
     grid-column: 1;
     grid-row: 3;
-    min-height: 0;
-    max-height: calc(100vh - 200px); /* Restore height constraint to force scrolling */
+    min-height: 0; /* Critical for grid child to shrink */
+    /* Let grid handle the height - no max-height needed */
     display: flex;
     flex-direction: column;
 }
@@ -876,13 +877,13 @@ body {
 .table-wrapper {
     overflow-x: auto;
     overflow-y: auto;
-    flex: 1;
-    height: 0; /* Force flex child to respect parent constraints */
+    flex: 1; /* Take all available space in flex container */
+    min-height: 0; /* Critical for flex child to shrink and scroll */
     scrollbar-width: thin;
     scrollbar-color: #667eea #f0f0f0;
     width: 100%;
     min-width: 100%;
-    padding-bottom: 40px; /* Add padding inside the scrollable area */
+    /* Remove conflicting padding - let natural spacing work */
 }
 
 /* Webkit scrollbar styling for table wrapper */
