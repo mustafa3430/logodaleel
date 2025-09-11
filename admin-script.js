@@ -127,13 +127,20 @@ function showPage(pageId, caller = 'navigation') {
         const fragmentName = pageId.replace('Page', '').toLowerCase();
         const expectedHash = '#' + fragmentName;
         
+        console.log(`🔗 Page: "${pageId}" → Fragment: "${fragmentName}" → Hash: "${expectedHash}"`);
         console.log(`🔗 Current URL hash: "${window.location.hash}", Expected: "${expectedHash}"`);
         
         if (caller !== 'fragment-restore' && caller !== 'initial-fragment') {
             console.log(`🔗 Updating URL fragment to ${expectedHash}`);
             try {
+                // Always update the URL, even if it seems the same
                 history.replaceState(null, null, expectedHash);
                 console.log(`✅ URL updated successfully to: ${window.location.hash}`);
+                
+                // Double-check the URL actually changed
+                setTimeout(() => {
+                    console.log(`🔍 URL verification after 100ms: ${window.location.hash}`);
+                }, 100);
             } catch (error) {
                 console.error('❌ Failed to update URL:', error);
             }
