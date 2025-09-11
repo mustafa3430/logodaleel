@@ -93,11 +93,13 @@ function showPage(pageId, caller = 'navigation') {
     
     console.log(`📄 Showing page: ${pageId} (called by: ${caller})`);
     
-    // Hide all pages
+    // Hide all pages with force
     const pages = document.querySelectorAll('.page');
     console.log(`📄 Found ${pages.length} page elements to hide`);
-    pages.forEach(page => {
+    pages.forEach((page, index) => {
         page.classList.remove('active');
+        page.style.display = 'none'; // Force hide with CSS
+        console.log(`📄 Hidden page ${index}: ${page.id}`);
     });
     
     // Show the selected page
@@ -105,6 +107,11 @@ function showPage(pageId, caller = 'navigation') {
     console.log(`📄 Target page element for "${pageId}":`, targetPage ? 'FOUND' : 'NOT FOUND');
     
     if (targetPage) {
+        // Force show the target page
+        targetPage.style.display = 'block';
+        targetPage.classList.add('active');
+        console.log(`📄 Forced display of ${pageId} - display: ${targetPage.style.display}, classList: ${targetPage.className}`);
+        
         // Update URL fragment IMMEDIATELY and ensure it persists
         const fragmentName = pageId.replace('Page', '').toLowerCase();
         const expectedHash = '#' + fragmentName;
@@ -117,10 +124,6 @@ function showPage(pageId, caller = 'navigation') {
         
         // Save current page to localStorage AFTER URL update
         saveCurrentPage(pageId);
-        
-        // Show page immediately, no setTimeout delay
-        targetPage.classList.add('active');
-        console.log(`✅ Page ${pageId} is now active`);
         
         // Log performance
         const endTime = performance.now();
@@ -920,24 +923,45 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup automatic bidirectional sync first
     setupAutomaticSync();
     
-    // Initialize page system FIRST - restore from URL fragment, localStorage, or default to dashboard
-    // Longer delay to ensure DOM elements are fully ready
+    // Mark restoration as completed immediately to allow navigation
+    pageRestorationCompleted = true;
+    console.log('✅ Page restoration marked as completed - navigation now enabled');
+    
+    // Initialize page system with a minimal delay
     setTimeout(() => {
-        console.log('🔄 Starting page restoration...');
-        pageRestorationCompleted = false; // Reset flag
+        console.log('🔄 Starting minimal page restoration...');
         
-        const pageRestored = restorePageFromFragment() || restoreCurrentPage();
-        if (!pageRestored) {
-            console.log('📄 No page to restore, defaulting to dashboard');
-            showPage('dashboardPage', 'fallback');
+        // Try to restore from URL fragment first
+        const fragment = window.location.hash.substring(1);
+        if (fragment) {
+            const fragmentToPageMap = {
+                'dashboard': 'dashboardPage',
+                'reports': 'reportsPage', 
+                'categories': 'categoriesPage',
+                'blacklist': 'blacklistPage',
+                'archive': 'archivePage',
+                'sitesettings': 'siteSettingsPage',
+                'settings': 'siteSettingsPage'
+            };
+            
+            const pageId = fragmentToPageMap[fragment.toLowerCase()];
+            if (pageId && document.getElementById(pageId)) {
+                console.log(`� Restoring from fragment: ${fragment} -> ${pageId}`);
+                showPage(pageId, 'initial-fragment');
+                updateActiveNavItem(fragment === 'sitesettings' || fragment === 'settings' ? 'Site Settings' : 
+                                   fragment.charAt(0).toUpperCase() + fragment.slice(1));
+            } else {
+                showPage('dashboardPage', 'initial-fallback');
+                updateActiveNavItem('Dashboard');
+            }
+        } else {
+            // Default to dashboard
+            console.log('📄 No fragment, defaulting to dashboard');
+            showPage('dashboardPage', 'initial-default');
             updateActiveNavItem('Dashboard');
         }
         
-        // Mark restoration as completed IMMEDIATELY
-        pageRestorationCompleted = true;
-        console.log('✅ Page restoration completed - navigation now enabled');
-        
-    }, 100); // Reduced delay but mark completion immediately
+    }, 50); // Very short delay
     
     // Load business categories from CSV first
     loadBusinessCategories().then(() => {
@@ -1038,8 +1062,11 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(applyDynamicZoom, 100); // Small delay to ensure resize is complete
     });
     
-    // Listen for browser back/forward navigation
+    // Listen for browser back/forward navigation (DISABLED for debugging)
     window.addEventListener('popstate', function(event) {
+        console.log('🔙 Popstate event triggered - DISABLED for debugging');
+        // TEMPORARILY DISABLED to eliminate navigation conflicts
+        /*
         console.log('🔙 Popstate event triggered - browser back/forward navigation');
         // Only handle browser back/forward with URL fragments - don't interfere with normal navigation
         if (pageRestorationCompleted && !restorationInProgress) {
@@ -1051,6 +1078,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             console.log('🔙 Skipping popstate restoration - page restoration not completed yet');
         }
+        */
     });
     
     // Ensure context-sensitive buttons visibility is set correctly on initial load
