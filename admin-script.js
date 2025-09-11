@@ -878,6 +878,75 @@ function createEmbeddedCategoriesData() {
     return categories;
 }
 
+// Create categories directly in the format expected by loadCategoriesHierarchy
+function createDirectCategoriesForDisplay() {
+    console.log('🔄 Creating direct categories for display...');
+    
+    // Get unique Level 1 categories from businessCategories
+    const level1Map = new Map();
+    
+    businessCategories.forEach(category => {
+        const level1En = category.level1?.en || 'Unknown';
+        const level1Ar = category.level1?.ar || 'غير معروف';
+        const level1Keywords = category.level1?.keywords || [level1En.toLowerCase()];
+        
+        if (!level1Map.has(level1En)) {
+            level1Map.set(level1En, {
+                english: level1En,
+                arabic: level1Ar,
+                level1_en: level1En,
+                level1_ar: level1Ar,
+                level1Keywords: level1Keywords,
+                keywords: level1Keywords,
+                level2Categories: [],
+                active: true
+            });
+        }
+        
+        // Add level 2 categories to this level 1
+        const level1Category = level1Map.get(level1En);
+        const level2En = category.level2?.en || 'General';
+        const level2Ar = category.level2?.ar || 'عام';
+        const level2Keywords = category.level2?.keywords || [level2En.toLowerCase()];
+        
+        // Check if this level 2 already exists
+        let level2Category = level1Category.level2Categories.find(l2 => l2.english === level2En);
+        if (!level2Category) {
+            level2Category = {
+                english: level2En,
+                arabic: level2Ar,
+                level2_en: level2En,
+                level2_ar: level2Ar,
+                level2Keywords: level2Keywords,
+                keywords: level2Keywords,
+                level3Categories: [],
+                active: true
+            };
+            level1Category.level2Categories.push(level2Category);
+        }
+        
+        // Add level 3 category
+        const level3En = category.level3?.en || 'Specific';
+        const level3Ar = category.level3?.ar || 'محدد';
+        const level3Keywords = category.level3?.keywords || [level3En.toLowerCase()];
+        
+        level2Category.level3Categories.push({
+            english: level3En,
+            arabic: level3Ar,
+            level3_en: level3En,
+            level3_ar: level3Ar,
+            level3Keywords: level3Keywords,
+            keywords: level3Keywords,
+            active: true
+        });
+    });
+    
+    const result = Array.from(level1Map.values());
+    console.log('✅ Created direct categories:', result.length, 'level 1 categories');
+    console.log('🔍 Sample direct category:', result[0]);
+    return result;
+}
+
 async function loadBusinessCategories() {
     try {
         console.log('🔄 Attempting to load business categories from CSV...');
@@ -7888,6 +7957,16 @@ function loadCategoriesPageData() {
                 console.log('🔄 Loaded embedded data directly:', businessCategories.length, 'categories');
                 
                 if (businessCategories.length > 0) {
+                    // Try direct approach first - create simplified categories for display
+                    console.log('🔄 Attempting direct category conversion...');
+                    const directCategories = createDirectCategoriesForDisplay();
+                    if (directCategories && directCategories.length > 0) {
+                        console.log('✅ Using direct categories approach:', directCategories.length, 'categories');
+                        loadCategoriesHierarchy(directCategories);
+                        return;
+                    }
+                    
+                    // Fallback to hierarchy conversion
                     const hierarchicalData = convertBusinessCategoriesToHierarchy(businessCategories);
                     const categoryArray = convertHierarchyToArray(hierarchicalData);
                     loadCategoriesHierarchy(categoryArray);
@@ -8003,9 +8082,13 @@ function convertHierarchyToArray(hierarchy) {
     Object.values(hierarchy).forEach(level1 => {
         if (level1.english && level1.arabic) {
             const level1Category = {
+                // Map to the format expected by loadCategoriesHierarchy
                 english: level1.english,
                 arabic: level1.arabic,
+                level1_en: level1.english,
+                level1_ar: level1.arabic,
                 level1Keywords: level1.level1Keywords || [],
+                keywords: level1.level1Keywords || [],
                 level2Categories: []
             };
             
@@ -8016,7 +8099,10 @@ function convertHierarchyToArray(hierarchy) {
                         const level2Category = {
                             english: level2.english,
                             arabic: level2.arabic,
+                            level2_en: level2.english,
+                            level2_ar: level2.arabic,
                             level2Keywords: level2.level2Keywords || [],
+                            keywords: level2.level2Keywords || [],
                             level3Categories: []
                         };
                         
@@ -8027,8 +8113,10 @@ function convertHierarchyToArray(hierarchy) {
                                     level2Category.level3Categories.push({
                                         english: level3.english,
                                         arabic: level3.arabic,
+                                        level3_en: level3.english,
+                                        level3_ar: level3.arabic,
                                         level3Keywords: level3.level3Keywords || [],
-                                        keywords: level3.keywords || []
+                                        keywords: level3.keywords || level3.level3Keywords || []
                                     });
                                 }
                             });
@@ -8043,7 +8131,8 @@ function convertHierarchyToArray(hierarchy) {
         }
     });
     
-    console.log(`✅ Converted hierarchy to array: ${categoryArray.length} level 1 categories`);
+    console.log('✅ Converted hierarchy to array:', categoryArray.length, 'level 1 categories');
+    console.log('🔍 Sample converted category structure:', categoryArray[0]);
     return categoryArray;
 }
 
