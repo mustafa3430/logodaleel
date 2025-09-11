@@ -868,7 +868,7 @@ body {
     grid-column: 1;
     grid-row: 3;
     min-height: 0; /* Critical for grid child to shrink */
-    /* Let grid handle the height - no max-height needed */
+    max-height: calc(100vh - 220px); /* Add height constraint to force scrolling */
     display: flex;
     flex-direction: column;
 }
