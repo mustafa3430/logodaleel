@@ -487,8 +487,8 @@ body {
     display: grid;
     grid-template-rows: auto auto 1fr;
     overflow: hidden; /* Dashboard handles its own scrolling via table */
-    height: 100%;
-    /* Remove padding that cuts off scrollbar */
+    height: calc(100% - 40px); /* Reduce height to create bottom space */
+    margin-bottom: 40px; /* Add visible bottom margin */
 }
 
 /* Other pages use flex layout for natural scrolling */
@@ -867,7 +867,7 @@ body {
     grid-column: 1;
     grid-row: 3;
     min-height: 0;
-    /* Remove restrictive max-height to allow full scrolling */
+    max-height: calc(100vh - 200px); /* Restore height constraint to force scrolling */
     display: flex;
     flex-direction: column;
 }
