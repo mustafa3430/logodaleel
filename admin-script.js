@@ -16,6 +16,7 @@ let allCompanies = [];
 let filteredCompanies = [];
 let editingRowId = null;
 let saudiLocationData = []; // Will be loaded from saudi_data.js
+let businessCategories = []; // Will be loaded from CSV file
 let currentStatusFilter = 'all'; // Track current status filter: all, active, deleted, blacklisted
 let pageRestorationCompleted = false; // Flag to track if restoration has completed
 let restorationInProgress = false; // Flag to prevent multiple restoration attempts
@@ -7785,7 +7786,6 @@ function loadCategoriesPageData() {
             tryFallbackCategories();
         }
         
-        function tryFallbackCategories() {
         function tryFallbackCategories() {
             // Priority 1: Use the main businessCategories data loaded from CSV
             console.log('📂 Trying main businessCategories data...');
