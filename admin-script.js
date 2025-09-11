@@ -998,7 +998,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Default to dashboard
             console.log('📄 No fragment, defaulting to dashboard');
             showPage('dashboardPage', 'initial-default');
-            updateActiveNavItem('Dashboard');
+            updateActiveNavItem('Home');
         }
         
     }, 50); // Very short delay
@@ -5467,7 +5467,25 @@ function getCurrentCategoriesCSVData() {
     try {
         console.log('📊 Getting current categories data...');
         
-        // Load the exact data from the CSV file to show all 1065 categories accurately
+        // Priority 1: Use the main businessCategories data loaded from CSV
+        if (typeof businessCategories !== 'undefined' && businessCategories.length > 0) {
+            console.log('✅ Using main businessCategories data:', businessCategories.length, 'categories');
+            // Convert to CSV format for table display
+            const csvFormatData = businessCategories.map(category => ({
+                level1_en: category.level1?.en || category.level1_en || '',
+                level1_ar: category.level1?.ar || category.level1_ar || '',
+                level2_en: category.level2?.en || category.level2_en || '',
+                level2_ar: category.level2?.ar || category.level2_ar || '',
+                level3_en: category.level3?.en || category.level3_en || '',
+                level3_ar: category.level3?.ar || category.level3_ar || '',
+                level1_keywords: (category.level1?.keywords || []).join('; '),
+                level2_keywords: (category.level2?.keywords || []).join('; '),
+                level3_keywords: (category.level3?.keywords || []).join('; ')
+            }));
+            return csvFormatData;
+        }
+        
+        // Priority 2: Load the exact data from the CSV file to show all 1065 categories accurately
         const exactCSVData = loadExact1065CategoriesFromCSV();
         if (exactCSVData.length >= 1065) {
             console.log('📊 Successfully loaded exact CSV data with', exactCSVData.length, 'categories');
@@ -7768,7 +7786,19 @@ function loadCategoriesPageData() {
         }
         
         function tryFallbackCategories() {
-            // Try legacy categories first
+            // Priority 1: Use the main businessCategories data loaded from CSV
+            console.log('📂 Trying main businessCategories data...');
+            if (typeof businessCategories !== 'undefined' && businessCategories.length > 0) {
+                console.log('✅ Using main businessCategories data:', businessCategories.length, 'categories');
+                // Convert businessCategories to hierarchy format
+                const hierarchicalData = convertBusinessCategoriesToHierarchy(businessCategories);
+                console.log('🌳 Converted businessCategories to hierarchy:', Object.keys(hierarchicalData).length, 'level1 categories');
+                const categoryArray = convertHierarchyToArray(hierarchicalData);
+                loadCategoriesHierarchy(categoryArray);
+                return;
+            }
+            
+            // Priority 2: Try legacy categories first
             const legacyCategories = JSON.parse(localStorage.getItem('logodaleel_categories') || '[]');
             console.log('� Legacy categories found:', legacyCategories.length);
             
