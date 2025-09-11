@@ -7818,6 +7818,11 @@ function filterCSVTable() {
 // Load all categories page data
 function loadCategoriesPageData() {
     console.log('🏗️ Loading categories page data...');
+    console.log('🔍 Current businessCategories state:', {
+        type: typeof businessCategories,
+        length: businessCategories ? businessCategories.length : 'undefined',
+        sample: businessCategories && businessCategories.length > 0 ? businessCategories[0] : 'none'
+    });
     
     // Show loading state first
     const container = document.getElementById('categoriesHierarchy');
@@ -7875,8 +7880,21 @@ function loadCategoriesPageData() {
                 loadCategoriesHierarchy(categoryArray);
                 return;
             } else {
-                console.warn('⚠️ businessCategories not available, trying to reload...');
-                // Try to reload business categories
+                console.warn('⚠️ businessCategories not available, trying to initialize embedded data directly...');
+                // If businessCategories is empty, load embedded data immediately
+                const embeddedData = createEmbeddedCategoriesData();
+                businessCategories.length = 0;
+                businessCategories.push(...embeddedData);
+                console.log('🔄 Loaded embedded data directly:', businessCategories.length, 'categories');
+                
+                if (businessCategories.length > 0) {
+                    const hierarchicalData = convertBusinessCategoriesToHierarchy(businessCategories);
+                    const categoryArray = convertHierarchyToArray(hierarchicalData);
+                    loadCategoriesHierarchy(categoryArray);
+                    return;
+                }
+                
+                // Try to reload business categories as secondary attempt
                 if (typeof loadBusinessCategories === 'function') {
                     loadBusinessCategories().then(() => {
                         console.log('🔄 Business categories reloaded, retrying...');
@@ -8696,10 +8714,12 @@ function loadCategoriesHierarchy(categories) {
         const status = level1Category.active !== false ? 'active' : 'inactive';
         const hasLevel2 = level1Category.level2Categories && level1Category.level2Categories.length > 0;
         
-        // Get Level 1 keywords
+        // Get Level 1 keywords with safety check
         const level1Keywords = level1Category.level1Keywords || level1Category.keywords || [];
-        const keywordsDisplay = level1Keywords.length > 0 ? 
-            level1Keywords.map(keyword => `<span class="keyword-tag">${keyword}</span>`).join('') :
+        // Ensure it's an array
+        const keywordsArray = Array.isArray(level1Keywords) ? level1Keywords : [];
+        const keywordsDisplay = keywordsArray.length > 0 ? 
+            keywordsArray.map(keyword => `<span class="keyword-tag">${keyword}</span>`).join('') :
             '<span class="no-keywords">No keywords</span>';
         
         return `
