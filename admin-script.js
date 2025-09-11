@@ -959,6 +959,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Try to restore from URL fragment first
         const fragment = window.location.hash.substring(1);
+        console.log(`🔍 RESTORATION: Current URL: ${window.location.href}`);
+        console.log(`🔍 RESTORATION: Raw hash: "${window.location.hash}"`);
+        console.log(`🔍 RESTORATION: Extracted fragment: "${fragment}"`);
+        
         if (fragment) {
             const fragmentToPageMap = {
                 'dashboard': 'dashboardPage',
