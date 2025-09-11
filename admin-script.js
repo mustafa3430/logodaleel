@@ -40,9 +40,13 @@ function closeSidePanel() {
 // Page Navigation Functions with Lazy Loading
 function navigateToHome() {
     console.log('🏠 navigateToHome called');
+    console.log('📂 BEFORE: Current URL hash:', window.location.hash);
     closeSidePanel();
+    console.log('📂 About to call showPage("dashboardPage", "navigation")');
     showPage('dashboardPage', 'navigation');
-    updateActiveNavItem('Dashboard');
+    console.log('📂 AFTER showPage: Current URL hash:', window.location.hash);
+    updateActiveNavItem('Home');
+    console.log('📂 navigateToHome completed');
 }
 
 function navigateToReports() {
@@ -124,7 +128,11 @@ function showPage(pageId, caller = 'navigation') {
         console.log(`📄 Forced display of ${pageId} - display: ${targetPage.style.display}, classList: ${targetPage.className}`);
         
         // Update URL fragment ALWAYS (unless it's restoration)
-        const fragmentName = pageId.replace('Page', '').toLowerCase();
+        let fragmentName = pageId.replace('Page', '').toLowerCase();
+        // Convert 'dashboard' to 'home' for cleaner URLs
+        if (fragmentName === 'dashboard') {
+            fragmentName = 'home';
+        }
         const expectedHash = '#' + fragmentName;
         
         console.log(`🔗 Page: "${pageId}" → Fragment: "${fragmentName}" → Hash: "${expectedHash}"`);
@@ -965,7 +973,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (fragment) {
             const fragmentToPageMap = {
-                'dashboard': 'dashboardPage',
+                'home': 'dashboardPage',
+                'dashboard': 'dashboardPage', // Keep for backward compatibility
                 'reports': 'reportsPage', 
                 'categories': 'categoriesPage',
                 'blacklist': 'blacklistPage',
@@ -978,11 +987,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (pageId && document.getElementById(pageId)) {
                 console.log(`� Restoring from fragment: ${fragment} -> ${pageId}`);
                 showPage(pageId, 'initial-fragment');
-                updateActiveNavItem(fragment === 'sitesettings' || fragment === 'settings' ? 'Site Settings' : 
+                updateActiveNavItem(fragment === 'home' || fragment === 'dashboard' ? 'Home' :
+                                   fragment === 'sitesettings' || fragment === 'settings' ? 'Site Settings' : 
                                    fragment.charAt(0).toUpperCase() + fragment.slice(1));
             } else {
                 showPage('dashboardPage', 'initial-fallback');
-                updateActiveNavItem('Dashboard');
+                updateActiveNavItem('Home');
             }
         } else {
             // Default to dashboard
@@ -7797,6 +7807,49 @@ function loadCategoriesPageData() {
             setupCategoryTreeToggleEvents();
         }, 500);
     }, 100); // Small delay to prevent flash
+}
+
+// Convert businessCategories array to hierarchy format for Categories page
+function convertBusinessCategoriesToHierarchy(businessCategoriesArray) {
+    console.log('🔄 Converting businessCategories to hierarchy format');
+    const hierarchy = {};
+    
+    businessCategoriesArray.forEach(category => {
+        const level1Key = category.level1?.en || category.level1_en || 'Unknown';
+        const level2Key = category.level2?.en || category.level2_en || 'Unknown';
+        const level3Key = category.level3?.en || category.level3_en || 'Unknown';
+        
+        // Initialize level 1 if it doesn't exist
+        if (!hierarchy[level1Key]) {
+            hierarchy[level1Key] = {
+                english: category.level1?.en || category.level1_en || level1Key,
+                arabic: category.level1?.ar || category.level1_ar || level1Key,
+                level1Keywords: category.level1?.keywords || [],
+                level2: {}
+            };
+        }
+        
+        // Initialize level 2 if it doesn't exist
+        if (!hierarchy[level1Key].level2[level2Key]) {
+            hierarchy[level1Key].level2[level2Key] = {
+                english: category.level2?.en || category.level2_en || level2Key,
+                arabic: category.level2?.ar || category.level2_ar || level2Key,
+                level2Keywords: category.level2?.keywords || [],
+                level3: {}
+            };
+        }
+        
+        // Add level 3
+        hierarchy[level1Key].level2[level2Key].level3[level3Key] = {
+            english: category.level3?.en || category.level3_en || level3Key,
+            arabic: category.level3?.ar || category.level3_ar || level3Key,
+            level3Keywords: category.level3?.keywords || [],
+            keywords: category.level3?.keywords || []
+        };
+    });
+    
+    console.log(`✅ Converted businessCategories to hierarchy: ${Object.keys(hierarchy).length} level 1 categories`);
+    return hierarchy;
 }
 
 // Convert hierarchy structure to array format for display
