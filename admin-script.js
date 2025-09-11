@@ -27,12 +27,14 @@ function closeSidePanel() {
 
 // Page Navigation Functions with Lazy Loading
 function navigateToHome() {
+    console.log('🏠 navigateToHome called');
     closeSidePanel();
     showPage('dashboardPage', 'navigation');
     updateActiveNavItem('Dashboard');
 }
 
 function navigateToReports() {
+    console.log('📊 navigateToReports called');
     closeSidePanel();
     showPage('reportsPage', 'navigation');
     updateActiveNavItem('Reports');
@@ -43,6 +45,7 @@ function navigateToReports() {
 }
 
 function navigateToBlacklist() {
+    console.log('🚫 navigateToBlacklist called');
     closeSidePanel();
     showPage('blacklistPage', 'navigation');
     updateActiveNavItem('Blacklist');
@@ -53,6 +56,7 @@ function navigateToBlacklist() {
 }
 
 function navigateToArchive() {
+    console.log('📦 navigateToArchive called');
     closeSidePanel();
     showPage('archivePage', 'navigation');
     updateActiveNavItem('Archive');
@@ -63,6 +67,7 @@ function navigateToArchive() {
 }
 
 function navigateToSiteSettings() {
+    console.log('⚙️ navigateToSiteSettings called');
     closeSidePanel();
     showPage('siteSettingsPage', 'navigation');
     updateActiveNavItem('Site Settings');
@@ -76,6 +81,8 @@ function showPage(pageId, caller = 'navigation') {
     // Performance monitoring
     const startTime = performance.now();
     
+    console.log(`📄 showPage called: pageId="${pageId}", caller="${caller}"`);
+    
     // Prevent conflicts during page restoration
     if (caller === 'navigation' && !pageRestorationCompleted) {
         console.log('⏳ Waiting for page restoration to complete before navigation...');
@@ -87,12 +94,15 @@ function showPage(pageId, caller = 'navigation') {
     
     // Hide all pages
     const pages = document.querySelectorAll('.page');
+    console.log(`📄 Found ${pages.length} page elements to hide`);
     pages.forEach(page => {
         page.classList.remove('active');
     });
     
     // Show the selected page
     const targetPage = document.getElementById(pageId);
+    console.log(`📄 Target page element for "${pageId}":`, targetPage ? 'FOUND' : 'NOT FOUND');
+    
     if (targetPage) {
         // Update URL fragment IMMEDIATELY and ensure it persists
         const fragmentName = pageId.replace('Page', '').toLowerCase();
@@ -109,6 +119,7 @@ function showPage(pageId, caller = 'navigation') {
         
         // Show page immediately, no setTimeout delay
         targetPage.classList.add('active');
+        console.log(`✅ Page ${pageId} is now active`);
         
         // Log performance
         const endTime = performance.now();
@@ -4888,6 +4899,7 @@ window.addEventListener('scroll', function() {
 
 // Categories Management Functions
 function navigateToCategories() {
+    console.log('📂 navigateToCategories called');
     closeSidePanel();
     showPage('categoriesPage', 'navigation');
     updateActiveNavItem('Categories');
