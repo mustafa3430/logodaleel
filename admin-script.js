@@ -4973,9 +4973,13 @@ window.addEventListener('scroll', function() {
 // Categories Management Functions
 function navigateToCategories() {
     console.log('📂 navigateToCategories called');
+    console.log('📂 BEFORE: Current URL hash:', window.location.hash);
     closeSidePanel();
+    console.log('📂 About to call showPage("categoriesPage", "navigation")');
     showPage('categoriesPage', 'navigation');
+    console.log('📂 AFTER showPage: Current URL hash:', window.location.hash);
     updateActiveNavItem('Categories');
+    console.log('📂 navigateToCategories completed');
     
     // Initialize categories if they don't exist
     console.log('🔍 Checking if categories exist...');
