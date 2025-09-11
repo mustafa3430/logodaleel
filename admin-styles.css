@@ -487,6 +487,7 @@ body {
     grid-template-rows: auto auto 1fr;
     overflow: hidden; /* Dashboard handles its own scrolling via table */
     height: 100%;
+    padding-bottom: 20px; /* Add bottom padding to the entire dashboard */
 }
 
 /* Other pages use flex layout for natural scrolling */
@@ -865,7 +866,7 @@ body {
     grid-column: 1;
     grid-row: 3;
     min-height: 0;
-    max-height: calc(100vh - 220px); /* Adjust for bottom spacing */
+    max-height: calc(100vh - 240px); /* Increased from 220px to account for dashboard padding */
     display: flex;
     flex-direction: column;
 }
