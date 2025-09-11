@@ -7786,16 +7786,38 @@ function loadCategoriesPageData() {
         }
         
         function tryFallbackCategories() {
+        function tryFallbackCategories() {
             // Priority 1: Use the main businessCategories data loaded from CSV
             console.log('📂 Trying main businessCategories data...');
-            if (typeof businessCategories !== 'undefined' && businessCategories.length > 0) {
+            console.log('📂 businessCategories type:', typeof businessCategories);
+            console.log('📂 businessCategories length:', businessCategories ? businessCategories.length : 'undefined');
+            
+            if (typeof businessCategories !== 'undefined' && businessCategories && businessCategories.length > 0) {
                 console.log('✅ Using main businessCategories data:', businessCategories.length, 'categories');
+                console.log('✅ Sample category structure:', businessCategories[0]);
                 // Convert businessCategories to hierarchy format
                 const hierarchicalData = convertBusinessCategoriesToHierarchy(businessCategories);
                 console.log('🌳 Converted businessCategories to hierarchy:', Object.keys(hierarchicalData).length, 'level1 categories');
                 const categoryArray = convertHierarchyToArray(hierarchicalData);
+                console.log('📋 Final category array for display:', categoryArray.length, 'categories');
                 loadCategoriesHierarchy(categoryArray);
                 return;
+            } else {
+                console.warn('⚠️ businessCategories not available, trying to reload...');
+                // Try to reload business categories
+                if (typeof loadBusinessCategories === 'function') {
+                    loadBusinessCategories().then(() => {
+                        console.log('🔄 Business categories reloaded, retrying...');
+                        if (businessCategories && businessCategories.length > 0) {
+                            const hierarchicalData = convertBusinessCategoriesToHierarchy(businessCategories);
+                            const categoryArray = convertHierarchyToArray(hierarchicalData);
+                            loadCategoriesHierarchy(categoryArray);
+                            return;
+                        }
+                    }).catch(error => {
+                        console.error('❌ Failed to reload business categories:', error);
+                    });
+                }
             }
             
             // Priority 2: Try legacy categories first
